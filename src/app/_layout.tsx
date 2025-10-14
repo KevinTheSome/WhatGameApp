@@ -10,54 +10,56 @@ import { ThemeProvider, useThemeContext } from "../contexts/ThemeContext";
 
 // This component wraps the app with the auth provider
 function RootLayoutNav() {
-    const { effectiveColorScheme } = useThemeContext();
+      const { effectiveColorScheme } = useThemeContext();
 
-    // This will handle redirecting the user based on auth state
-    useProtectedRoute();
+      // This will handle redirecting the user based on auth state
+      useProtectedRoute();
 
-    const theme =
-        effectiveColorScheme === "dark"
-            ? { ...MD3DarkTheme, colors: Colors.dark }
-            : { ...MD3LightTheme, colors: Colors.light };
+      const theme =
+            effectiveColorScheme === "dark"
+                  ? { ...MD3DarkTheme, colors: Colors.dark }
+                  : { ...MD3LightTheme, colors: Colors.light };
 
-    return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <PaperProvider theme={theme}>
-                <Stack
-                    screenOptions={{
-                        headerStyle: {
-                            backgroundColor: theme.colors.primaryContainer,
-                        },
-                        headerTintColor: theme.colors.onPrimaryContainer,
-                        headerTitleStyle: {
-                            fontWeight: "bold",
-                        },
-                    }}
-                >
-                    <Stack.Screen
-                        name="(tabs)"
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name="auth"
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name="index"
-                        options={{ headerShown: false }}
-                    />
-                </Stack>
-            </PaperProvider>
-        </GestureHandlerRootView>
-    );
+      return (
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                  <PaperProvider theme={theme}>
+                        <Stack
+                              screenOptions={{
+                                    headerStyle: {
+                                          backgroundColor:
+                                                theme.colors.primaryContainer,
+                                    },
+                                    headerTintColor:
+                                          theme.colors.onPrimaryContainer,
+                                    headerTitleStyle: {
+                                          fontWeight: "bold",
+                                    },
+                              }}
+                        >
+                              <Stack.Screen
+                                    name="(tabs)"
+                                    options={{ headerShown: false }}
+                              />
+                              <Stack.Screen
+                                    name="auth"
+                                    options={{ headerShown: false }}
+                              />
+                              <Stack.Screen
+                                    name="index"
+                                    options={{ headerShown: false }}
+                              />
+                        </Stack>
+                  </PaperProvider>
+            </GestureHandlerRootView>
+      );
 }
 
 export default function RootLayout() {
-    return (
-        <ThemeProvider>
-            <AuthProvider>
-                <RootLayoutNav />
-            </AuthProvider>
-        </ThemeProvider>
-    );
+      return (
+            <ThemeProvider>
+                  <AuthProvider>
+                        <RootLayoutNav />
+                  </AuthProvider>
+            </ThemeProvider>
+      );
 }

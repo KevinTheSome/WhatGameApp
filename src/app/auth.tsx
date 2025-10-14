@@ -14,21 +14,16 @@ export default function Page() {
       const router = useRouter();
       const theme = useTheme();
 
-      useEffect(() => {
-            const clearToken = async () => {
-                  await SecureStore.deleteItemAsync("token");
-            };
-            clearToken();
-      }, []);
-
       // pārbauda vai nav kļūda un saglabā "token"
-      async function handleResponse(response: object) {
+      async function handleResponse(response: object): Promise<string | null> {
             if (response["email"] != null) {
                   setError(response["email"]);
+                  return response["email"];
             } else {
-                  save("token", response.access_token);
-                  save("userName", response.user.name);
-                  save("user", JSON.stringify(response.user));
+                  await save("token", response.access_token);
+                  await save("userName", response.user.name);
+                  await save("user", JSON.stringify(response.user));
+                  return null;
             }
       }
 
@@ -49,7 +44,8 @@ export default function Page() {
                   if (json["error"] != null) {
                         return json["error"];
                   }
-                  handleResponse(json);
+                  const authError = await handleResponse(json);
+                  return authError;
             } catch (error) {
                   return "Failed to sign up";
             }
@@ -84,7 +80,8 @@ export default function Page() {
                         return json["error"];
                   }
                   // saglaba atbildi aizmugursistēmu
-                  handleResponse(json);
+                  const authError = await handleResponse(json);
+                  return authError;
             } catch (error) {
                   return "Failed to sign in";
             }
@@ -128,9 +125,7 @@ export default function Page() {
             }
 
             // ja veiksmigi aizved lietotāju uz "home" skatu
-            if ((await SecureStore.getItemAsync("token")) != null) {
-                  router.replace("/");
-            }
+            router.replace("/");
       };
 
       const handleSwitchMode = () => {
