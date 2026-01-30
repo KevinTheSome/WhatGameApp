@@ -43,7 +43,7 @@ export default function noConnection() {
             <View style={styles.iconContainer}>
                 <Ionicons name="wifi-outline" size={80} color="#666" />
                 <View style={styles.xOverlay}>
-                    <Ionicons name="close-outline" size={40} color="#f00" />
+                    <Ionicons name="close-outline" size={60} color="#f00" />
                 </View>
             </View>
             <Text style={styles.text}>Checking connection...</Text>
@@ -67,8 +67,9 @@ const styles = StyleSheet.create({
     },
     xOverlay: {
         position: "absolute",
-        top: 20,
-        left: 20,
+        top: "50%",
+        left: "50%",
+        transform: [{ translateX: -30 }, { translateY: -30 }],
     },
     text: {
         fontSize: 24,
