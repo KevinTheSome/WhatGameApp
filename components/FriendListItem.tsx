@@ -20,6 +20,29 @@ export default function FriendListItem(props: any) {
   }, []);
   
 
+  const renderAvatar = () => {
+    if (friend.profile_picture_url) {
+      return (
+        <Avatar.Image
+          size={40}
+          source={{ uri: friend.profile_picture_url }}
+          style={{ marginRight: 16, backgroundColor: "transparent" }}
+        />
+      );
+    }
+    return (
+      <Avatar.Text 
+        size={40} 
+        label={friend.name.charAt(0).toUpperCase()}
+        style={{
+          marginRight: 16,
+          backgroundColor: 'transparent',
+        }}
+        color={theme.colors.primary}
+      />
+    );
+  };
+
   let listItemJSX = null;
   if (props.type === "people") {
     const isCurrentUser = friend.id === userId;
@@ -35,17 +58,7 @@ export default function FriendListItem(props: any) {
             />
           ) : null
         }
-        left={(props) => (
-          <Avatar.Text 
-            size={40} 
-            label={friend.name.charAt(0).toUpperCase()}
-            style={{
-              marginRight: 16,
-              backgroundColor: 'transparent',
-            }}
-            color={theme.colors.primary}
-          />
-        )}
+        left={(props) => renderAvatar()}
         onPress={() => !isCurrentUser && props.handleAddFriend(friend)}
       />
     );
@@ -60,17 +73,7 @@ export default function FriendListItem(props: any) {
             color={theme.colors.onSurface}
           />
         )}
-        left={(props) => (
-          <Avatar.Text 
-            size={40} 
-            label={friend.name.charAt(0).toUpperCase()}
-            style={{
-              marginRight: 16,
-              backgroundColor: 'transparent',
-            }}
-            color={theme.colors.primary}
-          />
-        )}
+        left={(props) => renderAvatar()}
         onPress={() => props.handleRemoveFriend(friend)}
       />
     );
@@ -86,17 +89,7 @@ export default function FriendListItem(props: any) {
               color={theme.colors.onSurface}
             />
           )}
-          left={(props) => (
-            <Avatar.Text 
-              size={40} 
-              label={friend.name.charAt(0).toUpperCase()}
-              style={{
-                marginRight: 16,
-                backgroundColor: 'transparent',
-              }}
-              color={theme.colors.primary}
-            />
-          )}
+          left={(props) => renderAvatar()}
           onPress={() => props.handleRemoveFriend(friend)}
         />
       );
@@ -111,17 +104,7 @@ export default function FriendListItem(props: any) {
               color={theme.colors.onSurface}
             />
           )}
-          left={(props) => (
-            <Avatar.Text 
-              size={40} 
-              label={friend.name.charAt(0).toUpperCase()}
-              style={{
-                marginRight: 16,
-                backgroundColor: 'transparent',
-              }}
-              color={theme.colors.primary}
-            />
-          )}
+          left={(props) => renderAvatar()}
           onPress={() => props.handleAcceptFriend(friend)}
         />
       );

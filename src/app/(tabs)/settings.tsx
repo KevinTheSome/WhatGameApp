@@ -25,6 +25,8 @@ export default function Tab() {
       const [isEditModalVisible, setIsEditModalVisible] = useState(false);
       const [editedName, setEditedName] = useState("");
       const [editedEmail, setEditedEmail] = useState("");
+      const [isProfilePictureModalVisible, setIsProfilePictureModalVisible] = useState(false);
+      const [editedProfilePictureUrl, setEditedProfilePictureUrl] = useState("");
       const [isChangePasswordModalVisible, setIsChangePasswordModalVisible] =
             useState(false);
       const [oldPassword, setOldPassword] = useState("");
@@ -50,6 +52,7 @@ export default function Tab() {
                   setUser(userData);
                   setEditedName(userData.name);
                   setEditedEmail(userData.email);
+                  setEditedProfilePictureUrl(userData.profile_picture_url || "");
             }
             setLoading(false);
       }
@@ -185,6 +188,41 @@ export default function Tab() {
             }
       };
 
+      const handleUpdateProfilePictureUrl = async () => {
+            try {
+                  const response = await fetch(
+                        `${process.env.EXPO_PUBLIC_API_URL}/updateUser`,
+                        {
+                              method: "POST",
+                              headers: {
+                                    Accept: "application/json",
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
+                              },
+                              body: JSON.stringify({
+                                    profile_picture_url: editedProfilePictureUrl,
+                              }),
+                        },
+                  );
+
+                  const data = await response.json();
+
+                  if (response.ok) {
+                        await SecureStore.setItemAsync(
+                              "user",
+                              JSON.stringify(data.user),
+                        );
+                        setUser(data.user);
+                        setIsProfilePictureModalVisible(false);
+                  } else {
+                        setError(data.message || "Failed to update profile picture");
+                  }
+            } catch (error) {
+                  setError("An unexpected error occurred.");
+                  console.error(error);
+            }
+      };
+
       if (loading) {
             return (
                   <View style={styles.loadingContainer}>
@@ -195,13 +233,15 @@ export default function Tab() {
 
       return (
             <ScrollView
-                  style={[
-                        styles.container,
-                        {
-                              backgroundColor: theme.colors.background,
-                              paddingTop: insets.top,
-                        },
-                  ]}
+                  style={{
+                        flex: 1,
+                        backgroundColor: theme.colors.background,
+                  }}
+                  contentContainerStyle={{
+                        padding: 16,
+                        paddingTop: insets.top + 16,
+                        paddingBottom: 80,
+                  }}
             >
                   <Text
                         variant="headlineLarge"
@@ -235,6 +275,36 @@ export default function Tab() {
                                     Change Password
                               </Button>
                               <Button onPress={logout}>Logout</Button>
+                        </Card.Content>
+                  </Card>
+
+                  <Card style={styles.card}>
+                        <Card.Title
+                              title="Profile Picture"
+                              left={(props) => (
+                                    <Avatar.Icon {...props} icon="image" />
+                              )}
+                        />
+                        <Card.Content>
+                              {user?.profile_picture_url ? (
+                                    <Avatar.Image
+                                          key={user.profile_picture_url}
+                                          size={100}
+                                          source={{ uri: user.profile_picture_url }}
+                                          style={{ alignSelf: "center", marginBottom: 16, backgroundColor: "transparent" }}
+                                    />
+                              ) : (
+                                    <Avatar.Icon
+                                          size={100}
+                                          icon="account"
+                                          style={{ alignSelf: "center", marginBottom: 16 }}
+                                    />
+                              )}
+                              <Button
+                                    onPress={() => setIsProfilePictureModalVisible(true)}
+                              >
+                                    Update Picture URL
+                              </Button>
                         </Card.Content>
                   </Card>
 
@@ -343,6 +413,30 @@ export default function Tab() {
 
                   <Portal>
                         <Modal
+                              visible={isProfilePictureModalVisible}
+                              onDismiss={() => setIsProfilePictureModalVisible(false)}
+                              contentContainerStyle={styles.modalContainer}
+                        >
+                              <Card>
+                                    <Card.Title title="Edit Profile Picture" />
+                                    <Card.Content>
+                                          <TextInput
+                                                label="Image URL"
+                                                value={editedProfilePictureUrl}
+                                                onChangeText={setEditedProfilePictureUrl}
+                                                style={styles.input}
+                                                placeholder="https://example.com/avatar.jpg"
+                                          />
+                                          <Button onPress={handleUpdateProfilePictureUrl}>
+                                                Save
+                                          </Button>
+                                    </Card.Content>
+                              </Card>
+                        </Modal>
+                  </Portal>
+
+                  <Portal>
+                        <Modal
                               visible={isChangePasswordModalVisible}
                               onDismiss={() =>
                                     setIsChangePasswordModalVisible(false)
@@ -391,7 +485,6 @@ export default function Tab() {
 const styles = StyleSheet.create({
       container: {
             flex: 1,
-            padding: 16,
       },
       title: {
             fontWeight: "bold",

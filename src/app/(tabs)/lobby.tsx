@@ -75,6 +75,7 @@ export default function LobbyTab() {
                               id: u.id,
                               name: u.name,
                               ready: false,
+                              profilePictureUrl: u.profile_picture_url,
                         })),
                   );
                   setStatus(data.lobby.state ? "started" : "waiting");
@@ -241,6 +242,7 @@ export default function LobbyTab() {
                                                 lobby.creator_id ===
                                                 Number(item.id)
                                           }
+                                          profilePictureUrl={item.profilePictureUrl}
                                     />
                               )}
                               contentContainerStyle={styles.playersList}

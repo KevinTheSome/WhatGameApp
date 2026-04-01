@@ -6,19 +6,28 @@ interface PlayerListItemProps {
   id: string;
   name: string;
   isHost?: boolean;
+  profilePictureUrl?: string;
 }
 
-const PlayerListItem: React.FC<PlayerListItemProps> = ({ id, name, isHost = false }) => {
+const PlayerListItem: React.FC<PlayerListItemProps> = ({ id, name, isHost = false, profilePictureUrl }) => {
   const theme = useTheme();
   
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-      <Avatar.Text 
-        size={40} 
-        label={name.charAt(0).toUpperCase()}
-        style={styles.avatar}
-        color={theme.colors.primary}
-      />
+      {profilePictureUrl ? (
+        <Avatar.Image
+          size={40}
+          source={{ uri: profilePictureUrl }}
+          style={styles.avatar}
+        />
+      ) : (
+        <Avatar.Text 
+          size={40} 
+          label={name.charAt(0).toUpperCase()}
+          style={styles.avatar}
+          color={theme.colors.primary}
+        />
+      )}
       <View style={styles.textContainer}>
         <Text variant="titleMedium" numberOfLines={1}>
           {name} {isHost && '👑'}

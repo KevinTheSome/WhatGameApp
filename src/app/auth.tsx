@@ -14,17 +14,26 @@ export default function Page() {
       const router = useRouter();
       const theme = useTheme();
 
-      // pārbauda vai nav kļūda un saglabā "token"
-      async function handleResponse(response: object): Promise<string | null> {
-            if (response["email"] != null) {
-                  setError(response["email"]);
-                  return response["email"];
-            } else {
+      async function handleResponse(response: any): Promise<string | null> {
+            if (response.access_token) {
                   await save("token", response.access_token);
                   await save("userName", response.user.name);
                   await save("user", JSON.stringify(response.user));
                   return null;
             }
+            
+            if (response["password"] != null) {
+                  const err = Array.isArray(response["password"]) ? response["password"][0] : response["password"];
+                  return err;
+            } else if (response["email"] != null) {
+                  const err = Array.isArray(response["email"]) ? response["email"][0] : response["email"];
+                  return err;
+            } else if (response["name"] != null) {
+                  const err = Array.isArray(response["name"]) ? response["name"][0] : response["name"];
+                  return err;
+            }
+
+            return "Authentication failed.";
       }
 
       async function signUp(name: string, email: string, password: string) {
@@ -101,8 +110,12 @@ export default function Page() {
                   return;
             }
 
-            // pārbauda vai parole ir vairak par 8 rakstzīmēm
-            if (password.length < 8) {
+            // pārbauda vai parole atbilst drošības prasībām
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/;
+            if (isSignUp && !passwordRegex.test(password)) {
+                  setError("Password must be at least 8 characters, with 1 uppercase, 1 lowercase, and 1 special character.");
+                  return;
+            } else if (!isSignUp && password.length < 8) {
                   setError("Passwords must be at least 8 characters long.");
                   return;
             }
@@ -133,10 +146,11 @@ export default function Page() {
       };
 
       return (
-            <KeyboardAvoidingView
-                  behavior={Platform.OS === "ios" ? "padding" : "height"}
-                  style={styles.container}
-            >
+            <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+                  <KeyboardAvoidingView
+                        behavior={Platform.OS === "ios" ? "padding" : undefined}
+                        style={styles.container}
+                  >
                   <View
                         style={[
                               styles.content,
@@ -225,7 +239,8 @@ export default function Page() {
                                     : "Don't have an account? Sign Up"}
                         </Button>
                   </View>
-            </KeyboardAvoidingView>
+                  </KeyboardAvoidingView>
+            </View>
       );
 }
 

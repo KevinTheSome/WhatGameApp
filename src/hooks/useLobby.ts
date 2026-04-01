@@ -4,6 +4,7 @@ interface Player {
     id: string;
     name: string;
     ready?: boolean;
+    profilePictureUrl?: string;
 }
 
 type LobbyStatus = "waiting" | "ready" | "started";
