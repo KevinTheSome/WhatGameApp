@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { ActivityIndicator, StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet, BackHandler } from "react-native";
 import { View, FlatList } from "react-native";
 import { useRouter, useNavigation, useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,12 +28,13 @@ interface PlayersFavoriteGames {
 
 interface GameResultsResponse {
       success: boolean;
-      lobby_id: string;
-      games: { [id: string]: Game };
-      players_favorite_games: PlayersFavoriteGames;
-      total_votes_cast: number;
-      total_players: number;
-      player_votes: PlayerVotes;
+      voting_finished?: boolean;
+      lobby_id?: string;
+      games?: { [id: string]: Game };
+      players_favorite_games?: PlayersFavoriteGames;
+      total_votes_cast?: number;
+      total_players?: number;
+      player_votes?: PlayerVotes;
 }
 
 interface GameItem {
@@ -99,9 +100,16 @@ export default function VoteResults() {
                               setError(data.error);
                               setLoading(false);
                         } else {
-                              console.error(data.error);
+                              if (data.error !== "You are not in any lobby") {
+                                    console.error(data.error);
+                              }
                         }
-                  } else {
+                  } else if (data.voting_finished === false) {
+                        setGames(undefined);
+                        if (showLoading) {
+                              setLoading(false);
+                        }
+                  } else if (data.games) {
                         const gameItems: GameItem[] = Object.entries(data.games)
                               .map(([id, game]) => ({
                                     id,
@@ -130,16 +138,22 @@ export default function VoteResults() {
       };
 
       useEffect(() => {
-            navigation.setOptions({ headerShown: false });
+            navigation.setOptions({ headerShown: false, gestureEnabled: false });
       }, [navigation]);
 
       useFocusEffect(
             useCallback(() => {
+                  const onBackPress = () => true;
+                  const backHandler = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
                   getGameResults(true);
                   const interval = setInterval(() => {
                         getGameResults(false);
                   }, 2000);
-                  return () => clearInterval(interval);
+                  return () => {
+                        clearInterval(interval);
+                        backHandler.remove();
+                  };
             }, []),
       );
 
@@ -190,6 +204,20 @@ export default function VoteResults() {
                         >
                               <Text style={{ color: theme.colors.error }}>
                                     {error}
+                              </Text>
+                        </View>
+                  ) : games === undefined ? (
+                        <View
+                              style={{
+                                    flex: 1,
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    padding: 20
+                              }}
+                        >
+                              <ActivityIndicator size="large" style={{marginBottom: 20}} />
+                              <Text variant="titleMedium" style={{textAlign: "center"}}>
+                                    Waiting for everyone to vote...
                               </Text>
                         </View>
                   ) : (

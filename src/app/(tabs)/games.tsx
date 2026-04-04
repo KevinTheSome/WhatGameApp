@@ -163,7 +163,7 @@ export default function Tab() {
             [filter],
       );
 
-      const timer = useRef<number | null>(null);
+      const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
       useEffect(() => {
             if (filter !== "favourite") {
@@ -173,8 +173,11 @@ export default function Tab() {
 
                   if (searchQuery.trim() === "") {
                         setResults({ results: [] });
+                        setIsLoading(false);
                         return;
                   }
+
+                  setIsLoading(true);
 
                   timer.current = setTimeout(() => {
                         fetchGames();
@@ -198,7 +201,6 @@ export default function Tab() {
             if (filter === "favourite") {
                   const filtered = filterFavourites(searchQuery);
                   setResults({ results: filtered });
-                  setIsLoading(false);
             }
       }, [filter, searchQuery, allFavourites]);
 

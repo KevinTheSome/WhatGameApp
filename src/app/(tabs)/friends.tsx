@@ -10,7 +10,7 @@ import {
     Text,
 } from "react-native-paper";
 import FriendListItem from "components/FriendListItem";
-import EmptyConteiner from "components/EmptyConteiner";
+import EmptyContainer from "components/EmptyContainer";
 import * as SecureStore from "@/utils/SecureStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "expo-router";
@@ -22,7 +22,7 @@ export default function FriendsTab() {
     >("friends");
     const [isLoading, setIsLoading] = useState(false);
     const [people, setPeople] = useState([]);
-    const [requests, setrequests] = useState([]);
+    const [requests, setRequests] = useState([]);
     const [friends, setFriends] = useState([]);
     const [error, setError] = useState<string | null>(null);
     const theme = useTheme();
@@ -159,9 +159,9 @@ export default function FriendsTab() {
             const data = await response.json();
             if (data["error"] != null) {
                 setError(data["error"]);
-                setrequests([]);
+                setRequests([]);
             } else {
-                setrequests(data);
+                setRequests(data);
                 setError(null);
             }
         } catch (error) {
@@ -171,7 +171,7 @@ export default function FriendsTab() {
                     : "Failed to fetch friend requests";
             setError(errorMessage);
             console.error(errorMessage);
-            setrequests([]);
+            setRequests([]);
         } finally {
             setIsLoading(false);
         }
@@ -346,7 +346,7 @@ export default function FriendsTab() {
                         }
                         keyExtractor={(item) => item.id.toString()}
                         ListEmptyComponent={() =>
-                            EmptyConteiner("Nothing found for " + activeTab)
+                            EmptyContainer("Nothing found for " + activeTab)
                         }
                         renderItem={({ item }) => (
                             <FriendListItem

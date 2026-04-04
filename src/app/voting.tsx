@@ -44,7 +44,7 @@ export default function VotingView() {
 
     useEffect(() => {
         if (doneVoting) {
-            router.push("/voteResults");
+            router.replace("/voteResults");
         }
     }, [doneVoting]);
 
@@ -136,7 +136,7 @@ export default function VotingView() {
 
     if (loading) {
         return (
-            <View style={styles.loadingContainer}>
+            <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
                 <ActivityIndicator size="large" />
             </View>
         );

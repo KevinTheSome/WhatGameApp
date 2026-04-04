@@ -195,6 +195,22 @@ export default function LobbyTab() {
             );
       }
 
+      if (!lobby) {
+            return (
+                  <View
+                        style={[
+                              styles.loadingContainer,
+                              { backgroundColor: theme.colors.background },
+                        ]}
+                  >
+                        <Text>No lobby found or you are not in one.</Text>
+                        <Button mode="contained" onPress={() => router.push("/")} style={{ marginTop: 20 }}>
+                              Go to Home
+                        </Button>
+                  </View>
+            );
+      }
+
       return (
             <SafeAreaView
                   style={[

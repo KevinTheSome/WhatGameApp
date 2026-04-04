@@ -21,7 +21,7 @@ import { useNavigation, router, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import LobbyCardItem from "components/LobbyCardItem";
-import EmptyConteiner from "components/EmptyConteiner";
+import EmptyContainer from "components/EmptyContainer";
 import ErrorSnackBar from "components/ErrorSnackBar";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
@@ -337,7 +337,7 @@ export default function Tab() {
                                                 { paddingTop: insets.top },
                                           ]}
                                     >
-                                          {EmptyConteiner("No lobbies found")}
+                                          {EmptyContainer("No lobbies found")}
                                     </View>
                               )}
                               renderItem={({ item }) => (
