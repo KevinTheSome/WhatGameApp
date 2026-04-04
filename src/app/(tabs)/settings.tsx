@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { useState, useEffect, use } from "react";
 import { useThemeContext } from "../../contexts/ThemeContext";
 import {
@@ -11,6 +11,8 @@ import {
       Avatar,
       Modal,
       Portal,
+      SegmentedButtons,
+      Icon,
 } from "react-native-paper";
 import { router } from "expo-router";
 import * as SecureStore from "@/utils/SecureStore";
@@ -32,11 +34,13 @@ export default function Tab() {
       const [oldPassword, setOldPassword] = useState("");
       const [newPassword, setNewPassword] = useState("");
       const [confirmNewPassword, setConfirmNewPassword] = useState("");
+      const [isCustomColorModalVisible, setIsCustomColorModalVisible] = useState(false);
+      const [customRgbInput, setCustomRgbInput] = useState("");
       const insets = useSafeAreaInsets();
       const theme = useTheme();
       const navigation = useNavigation();
 
-      const { themePreference, setThemePreference, effectiveColorScheme } =
+      const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, setColorTheme, customColorRgb, setCustomColorRgb } =
             useThemeContext();
 
       useEffect(() => {
@@ -60,6 +64,12 @@ export default function Tab() {
       useEffect(() => {
             getUser();
       }, []);
+
+      useEffect(() => {
+            if (customColorRgb) {
+                  setCustomRgbInput(customColorRgb);
+            }
+      }, [customColorRgb]);
 
       async function logout() {
             await SecureStore.deleteItemAsync("token");
@@ -316,38 +326,94 @@ export default function Tab() {
                               )}
                         />
                         <Card.Content>
-                              <Text>
-                                    Current:{" "}
-                                    {(() => {
-                                          if (themePreference === "system") {
-                                                const scheme =
-                                                      effectiveColorScheme ||
-                                                      "light";
-                                                return `System (${scheme.charAt(0).toUpperCase() + scheme.slice(1)})`;
-                                          }
-                                          return (
-                                                themePreference
-                                                      .charAt(0)
-                                                      .toUpperCase() +
-                                                themePreference.slice(1)
-                                          );
-                                    })()}
+                              <Text variant="titleMedium" style={{ marginBottom: 12 }}>
+                                    System Theme
                               </Text>
-                              <Button
-                                    onPress={() => setThemePreference("system")}
-                              >
-                                    Use System Default
-                              </Button>
-                              <Button
-                                    onPress={() => setThemePreference("light")}
-                              >
-                                    Light Theme
-                              </Button>
-                              <Button
-                                    onPress={() => setThemePreference("dark")}
-                              >
-                                    Dark Theme
-                              </Button>
+                              <SegmentedButtons
+                                    value={themePreference}
+                                    onValueChange={(value) => setThemePreference(value as any)}
+                                    buttons={[
+                                          {
+                                                value: "system",
+                                                label: "System",
+                                                icon: "theme-light-dark",
+                                          },
+                                          {
+                                                value: "light",
+                                                label: "Light",
+                                                icon: "weather-sunny",
+                                          },
+                                          {
+                                                value: "dark",
+                                                label: "Dark",
+                                                icon: "weather-night",
+                                          },
+                                    ]}
+                                    style={{ marginBottom: 24 }}
+                              />
+
+                              <Text variant="titleMedium" style={{ marginBottom: 12 }}>
+                                    Color Palette
+                              </Text>
+                              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+                                    {[
+                                          { value: "teal", color: "#006874", label: "Teal" },
+                                          { value: "blue", color: "#005ac1", label: "Blue" },
+                                          { value: "green", color: "#006d3a", label: "Green" },
+                                          { value: "orange", color: "#984816", label: "Orange" },
+                                          { value: "purple", color: "#6750a4", label: "Purple" },
+                                          { value: "red", color: "#bb1614", label: "Red" },
+                                    ].map((preset) => (
+                                          <TouchableOpacity
+                                                key={preset.value}
+                                                onPress={() => setColorTheme(preset.value as any)}
+                                                style={{
+                                                      width: 50,
+                                                      height: 50,
+                                                      borderRadius: 25,
+                                                      backgroundColor: preset.color,
+                                                      justifyContent: "center",
+                                                      alignItems: "center",
+                                                      shadowColor: theme.colors.shadow,
+                                                      shadowOffset: { width: 0, height: 2 },
+                                                      shadowOpacity: 0.2,
+                                                      shadowRadius: 2,
+                                                      elevation: 3,
+                                                }}
+                                          >
+                                                {colorTheme === preset.value && (
+                                                      <Icon source="check" size={28} color="#ffffff" />
+                                                )}
+                                          </TouchableOpacity>
+                                    ))}
+                                    <TouchableOpacity
+                                          onPress={() => {
+                                                setColorTheme("custom");
+                                                setIsCustomColorModalVisible(true);
+                                          }}
+                                          style={{
+                                                width: 50,
+                                                height: 50,
+                                                borderRadius: 25,
+                                                backgroundColor: colorTheme === "custom" ? customColorRgb : theme.colors.surfaceVariant,
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                borderWidth: colorTheme === "custom" ? 0 : 1,
+                                                borderColor: theme.colors.outlineVariant,
+                                                shadowColor: theme.colors.shadow,
+                                                shadowOffset: { width: 0, height: 2 },
+                                                shadowOpacity: 0.2,
+                                                shadowRadius: 2,
+                                                elevation: 3,
+                                          }}
+                                    >
+                                          {colorTheme === "custom" ? (
+                                                <Icon source="palette-swatch" size={26} color="#ffffff" />
+                                          ) : (
+                                                <Icon source="palette-swatch" size={26} color={theme.colors.onSurfaceVariant} />
+                                          )}
+                                    </TouchableOpacity>
+                              </View>
                         </Card.Content>
                   </Card>
 
@@ -473,6 +539,33 @@ export default function Tab() {
                                                 onPress={handleChangePassword}
                                           >
                                                 Save
+                                          </Button>
+                                    </Card.Content>
+                              </Card>
+                        </Modal>
+                  </Portal>
+
+                  <Portal>
+                        <Modal
+                              visible={isCustomColorModalVisible}
+                              onDismiss={() => setIsCustomColorModalVisible(false)}
+                              contentContainerStyle={styles.modalContainer}
+                        >
+                              <Card>
+                                    <Card.Title title="Custom RGB Color" />
+                                    <Card.Content>
+                                          <TextInput
+                                                label="Valid CSS Color (e.g. #ff0000 or rgb(255, 0, 0))"
+                                                value={customRgbInput}
+                                                onChangeText={setCustomRgbInput}
+                                                style={styles.input}
+                                                autoCapitalize="none"
+                                          />
+                                          <Button onPress={() => {
+                                                setCustomColorRgb(customRgbInput);
+                                                setIsCustomColorModalVisible(false);
+                                          }}>
+                                                Save Custom Color
                                           </Button>
                                     </Card.Content>
                               </Card>

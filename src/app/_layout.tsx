@@ -10,15 +10,25 @@ import { ThemeProvider, useThemeContext } from "../contexts/ThemeContext";
 
 // This component wraps the app with the auth provider
 function RootLayoutNav() {
-      const { effectiveColorScheme } = useThemeContext();
+      const { effectiveColorScheme, colorTheme, customColorRgb } = useThemeContext();
 
       // This will handle redirecting the user based on auth state
       useProtectedRoute();
 
+      const basePresetName = colorTheme === 'custom' ? 'teal' : colorTheme;
+      const baseColors = Colors[basePresetName] || Colors['teal'];
+      
+      const customColors = colorTheme === 'custom'
+            ? {
+                  light: { ...baseColors.light, primary: customColorRgb, primaryContainer: customColorRgb },
+                  dark: { ...baseColors.dark, primary: customColorRgb, primaryContainer: customColorRgb }
+            }
+            : baseColors;
+
       const theme =
             effectiveColorScheme === "dark"
-                  ? { ...MD3DarkTheme, colors: Colors.dark }
-                  : { ...MD3LightTheme, colors: Colors.light };
+                  ? { ...MD3DarkTheme, colors: { ...MD3DarkTheme.colors, ...customColors.dark } }
+                  : { ...MD3LightTheme, colors: { ...MD3LightTheme.colors, ...customColors.light } };
 
       return (
             <GestureHandlerRootView style={{ flex: 1 }}>
