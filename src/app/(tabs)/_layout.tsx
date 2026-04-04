@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "react-native-paper";
 import { Slot, Stack, useRouter, useSegments, Tabs } from "expo-router";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 import { useState, useEffect } from "react";
 
 export default function TabLayout() {

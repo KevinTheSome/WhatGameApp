@@ -5,7 +5,7 @@ import { useRouter, useNavigation, useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, useTheme, Button } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 import GameItem from "../../components/GameItem";
 
 interface Game {

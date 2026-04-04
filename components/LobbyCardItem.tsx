@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { useState, useEffect } from "react";
 import { Text, Card, Button, useTheme, Avatar } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 
 export default function LobbyCardItem(props: any) {
     const theme = useTheme();

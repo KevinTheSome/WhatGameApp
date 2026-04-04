@@ -13,7 +13,7 @@ import {
       Portal,
 } from "react-native-paper";
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "expo-router";
 

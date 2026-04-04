@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { View, StyleSheet, ScrollView, FlatList } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 import {
       Text,
       Searchbar,

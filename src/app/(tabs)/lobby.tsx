@@ -3,7 +3,7 @@ import { Text, Button, Avatar, Card, useTheme } from "react-native-paper";
 import { useEffect, useState, useCallback } from "react";
 import { useLobby } from "@/hooks/useLobby";
 import { useRouter, useNavigation, useFocusEffect } from "expo-router";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ErrorSnackBar from "components/ErrorSnackBar";
 import PlayerListItem from "components/PlayerListItem";

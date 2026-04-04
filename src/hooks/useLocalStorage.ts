@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Platform } from "react-native";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 
 export function useLocalStorage(
     key: string,

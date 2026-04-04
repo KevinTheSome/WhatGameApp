@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useRouter, useSegments } from "expo-router";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 
 // This hook will protect the route access based on authentication status
 export function useProtectedRoute() {

@@ -3,7 +3,7 @@ import { BlurView } from "expo-blur";
 import { useEffect, useState } from "react";
 import { Text, Card, IconButton, useTheme } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 
 export default function GameCard(props: any) {
       const theme = useTheme();

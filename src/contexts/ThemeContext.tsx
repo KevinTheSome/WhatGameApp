@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '@/utils/SecureStore';
 
 type ThemePreference = 'system' | 'light' | 'dark';
 

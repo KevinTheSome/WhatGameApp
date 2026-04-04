@@ -11,7 +11,7 @@ import {
 } from "react-native-paper";
 import FriendListItem from "components/FriendListItem";
 import EmptyConteiner from "components/EmptyConteiner";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "expo-router";
 

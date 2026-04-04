@@ -2,7 +2,7 @@ import { View, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
 import { Text, List, Button, useTheme, Avatar } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 
 export default function FriendListItem(props: any) {
   const theme = useTheme();

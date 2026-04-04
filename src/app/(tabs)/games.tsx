@@ -1,6 +1,6 @@
 import { View, StyleSheet, FlatList } from "react-native";
 import { useNavigation, useFocusEffect } from "expo-router";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {

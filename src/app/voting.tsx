@@ -9,7 +9,7 @@ import { Text, useTheme, IconButton } from "react-native-paper";
 import { useRouter, useNavigation, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { use, useEffect, useState, useCallback } from "react";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "@/utils/SecureStore";
 import AnswerCard from "../../components/AnswerCard";
 
 export default function VotingView() {
