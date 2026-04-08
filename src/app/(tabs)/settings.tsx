@@ -18,6 +18,7 @@ import { router } from "expo-router";
 import * as SecureStore from "@/utils/SecureStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "expo-router";
+import { useUserStatistics } from "@/hooks/useUserStatistics";
 
 export default function Tab() {
       const [loading, setLoading] = useState(true);
@@ -40,8 +41,10 @@ export default function Tab() {
       const theme = useTheme();
       const navigation = useNavigation();
 
-      const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, setColorTheme, customColorRgb, setCustomColorRgb } =
-            useThemeContext();
+const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, setColorTheme, customColorRgb, setCustomColorRgb } =
+             useThemeContext();
+
+      const { statistics, loading: statsLoading } = useUserStatistics();
 
       useEffect(() => {
             navigation.setOptions({ headerShown: false });
@@ -285,6 +288,49 @@ export default function Tab() {
                                     Change Password
                               </Button>
                               <Button onPress={logout}>Logout</Button>
+                        </Card.Content>
+                  </Card>
+
+                  <Card style={styles.card}>
+                        <Card.Title
+                              title="Statistics"
+                              left={(props) => (
+                                    <Avatar.Icon {...props} icon="chart-bar" />
+                              )}
+                        />
+                        <Card.Content>
+                              {statsLoading ? (
+                                    <ActivityIndicator size="small" />
+                              ) : statistics ? (
+                                    <>
+                                          <View style={styles.statRow}>
+                                                <Icon source="calendar-clock" size={20} />
+                                                <Text style={styles.statText}>
+                                                      Account age: {statistics.account_age_in_days} days
+                                                </Text>
+                                          </View>
+                                          <View style={styles.statRow}>
+                                                <Icon source="account-group" size={20} />
+                                                <Text style={styles.statText}>
+                                                      Lobbies created: {statistics.lobbies_created}
+                                                </Text>
+                                          </View>
+                                          <View style={styles.statRow}>
+                                                <Icon source="account-multiple-plus" size={20} />
+                                                <Text style={styles.statText}>
+                                                      Lobbies joined: {statistics.lobbies_joined}
+                                                </Text>
+                                          </View>
+                                          <View style={styles.statRow}>
+                                                <Icon source="vote" size={20} />
+                                                <Text style={styles.statText}>
+                                                      Games voted on: {statistics.games_voted_on}
+                                                </Text>
+                                          </View>
+                                    </>
+                              ) : (
+                                    <Text>Unable to load statistics</Text>
+                              )}
                         </Card.Content>
                   </Card>
 
@@ -599,5 +645,14 @@ const styles = StyleSheet.create({
       },
       input: {
             marginBottom: 16,
+      },
+      statRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 12,
+      },
+      statText: {
+            marginLeft: 12,
+            fontSize: 16,
       },
 });
