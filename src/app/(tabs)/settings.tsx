@@ -278,16 +278,16 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                               <Button
                                     onPress={() => setIsEditModalVisible(true)}
                               >
-                                    Edit Profile
+                                    <Text>Edit Profile</Text>
                               </Button>
                               <Button
                                     onPress={() =>
                                           setIsChangePasswordModalVisible(true)
                                     }
                               >
-                                    Change Password
+                                    <Text>Change Password</Text>
                               </Button>
-                              <Button onPress={logout}>Logout</Button>
+                              <Button onPress={logout}><Text>Logout</Text></Button>
                         </Card.Content>
                   </Card>
 
@@ -327,6 +327,18 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                                       Games voted on: {statistics.games_voted_on}
                                                 </Text>
                                           </View>
+                                          <View style={styles.statRow}>
+                                                <Icon source="thumb-up" size={20} />
+                                                <Text style={styles.statText}>
+                                                      Most liked: {statistics.most_liked_game ? `${statistics.most_liked_game.name} (${statistics.most_liked_game.count} upvotes)` : "None"}
+                                                </Text>
+                                          </View>
+                                          <View style={styles.statRow}>
+                                                <Icon source="thumb-down" size={20} />
+                                                <Text style={styles.statText}>
+                                                      Most disliked: {statistics.most_disliked_game ? `${statistics.most_disliked_game.name} (${statistics.most_disliked_game.count} downvotes)` : "None"}
+                                                </Text>
+                                          </View>
                                     </>
                               ) : (
                                     <Text>Unable to load statistics</Text>
@@ -359,7 +371,7 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                               <Button
                                     onPress={() => setIsProfilePictureModalVisible(true)}
                               >
-                                    Update Picture URL
+                                    <Text>Update Picture URL</Text>
                               </Button>
                         </Card.Content>
                   </Card>
@@ -490,7 +502,7 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                           {error}
                                     </Text>
                               ) : null}
-                              <Button onPress={delUser}>Delete User</Button>
+                              <Button onPress={delUser}><Text>Delete User</Text></Button>
                         </Card.Content>
                   </Card>
 
@@ -516,7 +528,7 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                                 style={styles.input}
                                           />
                                           <Button onPress={handleUpdateProfile}>
-                                                Save
+                                                <Text>Save</Text>
                                           </Button>
                                     </Card.Content>
                               </Card>
@@ -540,7 +552,7 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                                 placeholder="https://example.com/avatar.jpg"
                                           />
                                           <Button onPress={handleUpdateProfilePictureUrl}>
-                                                Save
+                                                <Text>Save</Text>
                                           </Button>
                                     </Card.Content>
                               </Card>
@@ -584,7 +596,7 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                           <Button
                                                 onPress={handleChangePassword}
                                           >
-                                                Save
+                                                <Text>Save</Text>
                                           </Button>
                                     </Card.Content>
                               </Card>
@@ -611,7 +623,7 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                                 setCustomColorRgb(customRgbInput);
                                                 setIsCustomColorModalVisible(false);
                                           }}>
-                                                Save Custom Color
+                                                <Text>Save Custom Color</Text>
                                           </Button>
                                     </Card.Content>
                               </Card>

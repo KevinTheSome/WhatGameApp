@@ -5,7 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Text, useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function noConnection() {
+export default function NoConnection() {
     const router = useRouter();
     const theme = useTheme();
     const navigation = useNavigation();

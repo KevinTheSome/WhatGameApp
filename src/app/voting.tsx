@@ -1,7 +1,6 @@
 import {
     View,
     StyleSheet,
-    SafeAreaView,
     Dimensions,
     ActivityIndicator,
 } from "react-native";

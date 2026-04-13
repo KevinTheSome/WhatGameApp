@@ -461,7 +461,7 @@ export default function Tab() {
                                                 }
                                                 loading={isLoading}
                                           >
-                                                Create Lobby
+                                                <Text style={{color: theme.colors.onPrimary}}>Create Lobby</Text>
                                           </Button>
                                     </Card.Content>
                               </Card>

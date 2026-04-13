@@ -1,10 +1,10 @@
-import { View, StyleSheet, FlatList, SafeAreaView } from "react-native";
+import { View, StyleSheet, FlatList } from "react-native";
 import { Text, Button, Avatar, Card, useTheme } from "react-native-paper";
 import { useEffect, useState, useCallback } from "react";
 import { useLobby } from "@/hooks/useLobby";
 import { useRouter, useNavigation, useFocusEffect } from "expo-router";
 import * as SecureStore from "@/utils/SecureStore";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets, SafeAreaView } from "react-native-safe-area-context";
 import ErrorSnackBar from "components/ErrorSnackBar";
 import PlayerListItem from "components/PlayerListItem";
 
@@ -205,7 +205,7 @@ export default function LobbyTab() {
                   >
                         <Text>No lobby found or you are not in one.</Text>
                         <Button mode="contained" onPress={() => router.push("/")} style={{ marginTop: 20 }}>
-                              Go to Home
+                              <Text>Go to Home</Text>
                         </Button>
                   </View>
             );
@@ -273,7 +273,7 @@ export default function LobbyTab() {
                               labelStyle={styles.buttonLabel}
                               disabled={status === "started"}
                         >
-                              Leave Lobby
+                              <Text>Leave Lobby</Text>
                         </Button>
 
                         {lobby.creator_id === Number(userId) && (
@@ -287,7 +287,7 @@ export default function LobbyTab() {
                                           status === "started"
                                     }
                               >
-                                    Start Voting
+                                    <Text>Start Voting</Text>
                               </Button>
                         )}
                   </View>

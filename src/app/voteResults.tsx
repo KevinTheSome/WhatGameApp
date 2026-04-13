@@ -180,7 +180,7 @@ export default function VoteResults() {
                               style={[styles.button]}
                               labelStyle={styles.buttonLabel}
                         >
-                              Leave Lobby
+                              <Text>Leave Lobby</Text>
                         </Button>
                   </View>
 

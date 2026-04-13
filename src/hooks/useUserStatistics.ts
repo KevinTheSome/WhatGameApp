@@ -7,6 +7,8 @@ interface UserStatistics {
   lobbies_joined: number;
   games_voted_on: number;
   last_login: string | null;
+  most_liked_game: { name: string; count: number } | null;
+  most_disliked_game: { name: string; count: number } | null;
 }
 
 export function useUserStatistics() {
