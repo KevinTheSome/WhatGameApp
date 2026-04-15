@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WhatGame",
-    "slug": "What-Game",
+    "slug": "whatgame",
     "scheme": "acme",
     "userInterfaceStyle": "automatic",
     "orientation": "default",
@@ -32,8 +32,9 @@
         "origin": "https://n"
       },
       "eas": {
-        "projectId": "ccb5fc14-e325-410e-ae00-165585850ea1"
+        "projectId": "b6112b8d-a109-4bd4-96f6-7a314bdb940a"
       }
-    }
+    },
+    "owner": "kevinthesome"
   }
 }
