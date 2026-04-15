@@ -10,6 +10,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { use, useEffect, useState, useCallback } from "react";
 import * as SecureStore from "@/utils/SecureStore";
 import AnswerCard from "../../components/AnswerCard";
+import ErrorSnackBar from "components/ErrorSnackBar";
+import { Button } from "react-native-paper";
 
 export default function VotingView() {
     const theme = useTheme();
@@ -68,6 +70,7 @@ export default function VotingView() {
             const data = await response.json();
             if (data["error"]) {
                 setError(data["error"]);
+                setLoading(false);
             } else {
                 setGames(data["games"]);
                 setError(null);
@@ -137,6 +140,17 @@ export default function VotingView() {
         return (
             <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
                 <ActivityIndicator size="large" />
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background, padding: 20 }]}>
+                <Text style={{ textAlign: "center", marginBottom: 20, color: theme.colors.error }}>{error}</Text>
+                <Button mode="contained" onPress={() => router.replace("/(tabs)/lobby")}>
+                    Go back to Lobby
+                </Button>
             </View>
         );
     }

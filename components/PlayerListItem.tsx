@@ -12,12 +12,27 @@ interface PlayerListItemProps {
 const PlayerListItem: React.FC<PlayerListItemProps> = ({ id, name, isHost = false, profilePictureUrl }) => {
   const theme = useTheme();
   
+  const getFixedUrl = (url?: string) => {
+    if (!url) return url;
+    if (url.includes('localhost') || url.includes('127.0.0.1')) {
+      const baseUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/api$/, '');
+      return url.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, baseUrl || '');
+    }
+    if (url.startsWith('/')) {
+      const baseUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/api$/, '');
+      return `${baseUrl}${url}`;
+    }
+    return url;
+  };
+
+  const fixedUrl = getFixedUrl(profilePictureUrl);
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-      {profilePictureUrl ? (
+      {fixedUrl ? (
         <Avatar.Image
           size={40}
-          source={{ uri: profilePictureUrl }}
+          source={{ uri: fixedUrl }}
           style={styles.avatar}
         />
       ) : (

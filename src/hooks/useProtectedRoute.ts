@@ -10,7 +10,6 @@ export function useProtectedRoute() {
       useEffect(() => {
             const checkAuth = async () => {
                   const token = await SecureStore.getItemAsync("token");
-                  console.log(token);
                   const inAuthGroup = segments[0] === "auth";
 
                   if (!token && !inAuthGroup) {

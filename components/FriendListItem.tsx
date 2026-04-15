@@ -20,12 +20,26 @@ export default function FriendListItem(props: any) {
   }, []);
   
 
+  const getFixedUrl = (url?: string) => {
+    if (!url) return url;
+    if (url.includes('localhost') || url.includes('127.0.0.1')) {
+      const baseUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/api$/, '');
+      return url.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, baseUrl || '');
+    }
+    if (url.startsWith('/')) {
+      const baseUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/api$/, '');
+      return `${baseUrl}${url}`;
+    }
+    return url;
+  };
+
   const renderAvatar = () => {
-    if (friend.profile_picture_url) {
+    const fixedUrl = getFixedUrl(friend.profile_picture_url);
+    if (fixedUrl) {
       return (
         <Avatar.Image
           size={40}
-          source={{ uri: friend.profile_picture_url }}
+          source={{ uri: fixedUrl }}
           style={{ marginRight: 16, backgroundColor: "transparent" }}
         />
       );

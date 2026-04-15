@@ -275,6 +275,8 @@ export default function Tab() {
                                     onPress={() => setIsEditModalVisible(true)}
                                     style={styles.createButton}
                                     contentStyle={styles.createButtonContent}
+                                    buttonColor={theme.colors.primary}
+                                    textColor={theme.colors.onPrimary}
                                     theme={{
                                           colors: {
                                                 primary: theme.colors.primary,
@@ -302,6 +304,8 @@ export default function Tab() {
                                           theme.colors.surfaceVariant,
                                     onSecondaryContainer:
                                           theme.colors.onSurfaceVariant,
+                                    onSurface: theme.colors.onSurface,
+                                    outline: theme.colors.outline,
                               },
                         }}
                         buttons={SEGMENTED_BUTTONS}
@@ -372,6 +376,7 @@ export default function Tab() {
                                                 <IconButton
                                                       {...props}
                                                       icon="arrow-left"
+                                                      iconColor={theme.colors.onPrimaryContainer}
                                                       size={24}
                                                       style={{
                                                             margin: 0,
@@ -421,7 +426,7 @@ export default function Tab() {
                                           />
                                           <View style={styles.toggleContainer}>
                                                 <Text
-                                                      style={styles.toggleLabel}
+                                                      style={[styles.toggleLabel, {color: theme.colors.onSurface}]}
                                                 >
                                                       Friends Only
                                                 </Text>
@@ -438,6 +443,7 @@ export default function Tab() {
                                                                   }),
                                                             )
                                                       }
+                                                      color={theme.colors.primary}
                                                 />
                                           </View>
                                           {error && (
@@ -460,6 +466,14 @@ export default function Tab() {
                                                       !newLobbyData.name.trim()
                                                 }
                                                 loading={isLoading}
+                                                buttonColor={theme.colors.primary}
+                                                textColor={theme.colors.onPrimary}
+                                                theme={{
+                                                      colors: {
+                                                            primary: theme.colors.primary,
+                                                            onPrimary: theme.colors.onPrimary,
+                                                      }
+                                                }}
                                           >
                                                 <Text style={{color: theme.colors.onPrimary}}>Create Lobby</Text>
                                           </Button>

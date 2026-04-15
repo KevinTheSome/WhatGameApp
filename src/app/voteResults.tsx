@@ -71,7 +71,7 @@ export default function VoteResults() {
                         setError(data["error"]);
                   } else {
                         setLoading(false);
-                        router.push("/");
+                        router.replace("/");
                   }
             } catch (error) {
                   console.error(error);

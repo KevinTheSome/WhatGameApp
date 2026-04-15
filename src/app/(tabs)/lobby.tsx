@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useLobby } from "@/hooks/useLobby";
 import { useRouter, useNavigation, useFocusEffect } from "expo-router";
 import * as SecureStore from "@/utils/SecureStore";
-import { useSafeAreaInsets, SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ErrorSnackBar from "components/ErrorSnackBar";
 import PlayerListItem from "components/PlayerListItem";
 
@@ -62,6 +62,7 @@ export default function LobbyTab() {
                   if (data.error) {
                         setLobby(null);
                         setError(data.error);
+                        setLoading(false);
                         // If user is not in any lobby, navigate to home
                         if (data.error === "Not in any lobby") {
                               // router.replace('/');
@@ -134,7 +135,7 @@ export default function LobbyTab() {
                         setError(data["error"]);
                   } else {
                         setLoading(false);
-                        router.push("/");
+                        router.replace("/");
                   }
             } catch (error) {
                   console.error(error);
@@ -165,22 +166,7 @@ export default function LobbyTab() {
             }
       };
 
-      if (error) {
-            return (
-                  <View
-                        style={[
-                              styles.loadingContainer,
-                              { backgroundColor: theme.colors.background },
-                        ]}
-                  >
-                        <ErrorSnackBar
-                              message={error || ""}
-                              type={error ? "error" : "info"}
-                              onDismiss={() => setError(null)}
-                        />
-                  </View>
-            );
-      }
+
 
       if (loading) {
             return (
@@ -204,7 +190,7 @@ export default function LobbyTab() {
                         ]}
                   >
                         <Text>No lobby found or you are not in one.</Text>
-                        <Button mode="contained" onPress={() => router.push("/")} style={{ marginTop: 20 }}>
+                        <Button mode="contained" onPress={() => router.replace("/")} style={{ marginTop: 20 }}>
                               <Text>Go to Home</Text>
                         </Button>
                   </View>
@@ -212,10 +198,15 @@ export default function LobbyTab() {
       }
 
       return (
-            <SafeAreaView
+            <View
                   style={[
                         styles.container,
-                        { backgroundColor: theme.colors.background },
+                        { 
+                              backgroundColor: theme.colors.background,
+                              paddingLeft: insets.left,
+                              paddingRight: insets.right,
+                              paddingBottom: insets.bottom 
+                        },
                   ]}
             >
                   <ErrorSnackBar
@@ -291,7 +282,7 @@ export default function LobbyTab() {
                               </Button>
                         )}
                   </View>
-            </SafeAreaView>
+            </View>
       );
 }
 
