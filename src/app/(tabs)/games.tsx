@@ -12,6 +12,7 @@ import {
       Chip,
       Button,
       Icon,
+      TextInput,
 } from "react-native-paper";
 import GameCard from "components/GameCard";
 import ErrorSnackBar from "components/ErrorSnackBar";
@@ -51,11 +52,13 @@ export default function Tab() {
       const [error, setError] = useState<string | null>(null);
       const [allFavourites, setAllFavourites] = useState([]);
       const [showFilters, setShowFilters] = useState(false);
-      const [filters, setFilters] = useState<Filters>({ genres: [], tags: [] });
-      const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
-      const [selectedTags, setSelectedTags] = useState<number[]>([]);
-      const [selectedMetacritic, setSelectedMetacritic] = useState("");
-      const [selectedOrdering, setSelectedOrdering] = useState("");
+const [filters, setFilters] = useState<Filters>({ genres: [], tags: [] });
+       const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
+       const [selectedTags, setSelectedTags] = useState<number[]>([]);
+       const [selectedMetacritic, setSelectedMetacritic] = useState("");
+       const [selectedOrdering, setSelectedOrdering] = useState("");
+       const [genreSearch, setGenreSearch] = useState("");
+       const [tagSearch, setTagSearch] = useState("");
       const theme = useTheme();
       const insets = useSafeAreaInsets();
       const navigation = useNavigation();
@@ -143,11 +146,20 @@ export default function Tab() {
             setSelectedTags([]);
             setSelectedMetacritic("");
             setSelectedOrdering("");
+            setGenreSearch("");
+            setTagSearch("");
       };
 
-      const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 || selectedMetacritic !== "" || selectedOrdering !== "";
+const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 || selectedMetacritic !== "" || selectedOrdering !== "";
 
-      const toggleGenre = (id: number) => {
+       const filteredGenres = filters.genres.filter((g) =>
+             g.name.toLowerCase().includes(genreSearch.toLowerCase())
+       );
+       const filteredTags = filters.tags.filter((t) =>
+             t.name.toLowerCase().includes(tagSearch.toLowerCase())
+       );
+
+       const toggleGenre = (id: number) => {
             setSelectedGenres((prev) =>
                   prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id],
             );
@@ -390,9 +402,17 @@ export default function Tab() {
                                           <View style={styles.filterHeader}>
                                                 <Text variant="labelLarge">Genres</Text>
                                           </View>
+                                          <TextInput
+                                                mode="outlined"
+                                                placeholder="Search genres..."
+                                                value={genreSearch}
+                                                onChangeText={setGenreSearch}
+                                                dense
+                                                right={genreSearch ? <TextInput.Icon icon="close" onPress={() => setGenreSearch("")} /> : null}
+                                          />
                                           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                                 <View style={styles.chipRow}>
-                                                      {filters.genres.map((genre) => (
+                                                      {filteredGenres.map((genre) => (
                                                             <Chip
                                                                   key={genre.id}
                                                                   selected={selectedGenres.includes(genre.id)}
@@ -411,9 +431,17 @@ export default function Tab() {
                                           <View style={styles.filterHeader}>
                                                 <Text variant="labelLarge">Tags</Text>
                                           </View>
+                                          <TextInput
+                                                mode="outlined"
+                                                placeholder="Search tags..."
+                                                value={tagSearch}
+                                                onChangeText={setTagSearch}
+                                                dense
+                                                right={tagSearch ? <TextInput.Icon icon="close" onPress={() => setTagSearch("")} /> : null}
+                                          />
                                           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                                 <View style={styles.chipRow}>
-                                                      {filters.tags.map((tag) => (
+                                                      {filteredTags.map((tag) => (
                                                             <Chip
                                                                   key={tag.id}
                                                                   selected={selectedTags.includes(tag.id)}
@@ -517,9 +545,9 @@ const styles = StyleSheet.create({
              marginBottom: 8,
              gap: 12,
        },
-       filterSection: {
-             gap: 8,
-       },
+filterSection: {
+              gap: 4,
+        },
        filterHeader: {
              flexDirection: "row",
              alignItems: "center",
