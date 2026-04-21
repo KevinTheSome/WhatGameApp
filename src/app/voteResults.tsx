@@ -113,6 +113,7 @@ export default function VoteResults() {
                         const gameItems: GameItem[] = Object.entries(data.games)
                               .map(([id, game]) => ({
                                     id,
+                                    game_id: parseInt(id),
                                     name: game.name,
                                     votes: game.votes,
                                     background_image: game.background_image,
