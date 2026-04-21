@@ -1,4 +1,4 @@
-import { View, StyleSheet, FlatList } from "react-native";
+import { View, StyleSheet, FlatList, ScrollView } from "react-native";
 import { useNavigation, useFocusEffect } from "expo-router";
 import * as SecureStore from "@/utils/SecureStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -9,9 +9,39 @@ import {
       SegmentedButtons,
       useTheme,
       ActivityIndicator,
+      Chip,
+      Button,
+      Icon,
 } from "react-native-paper";
 import GameCard from "components/GameCard";
 import ErrorSnackBar from "components/ErrorSnackBar";
+
+interface FilterOption {
+      id: number;
+      name: string;
+}
+
+interface Filters {
+      genres: FilterOption[];
+      tags: FilterOption[];
+}
+
+const METACRITIC_OPTIONS = [
+      { label: "Any", value: "" },
+      { label: "90+", value: "90,100" },
+      { label: "80+", value: "80,100" },
+      { label: "70+", value: "70,100" },
+      { label: "60+", value: "60,100" },
+];
+
+const ORDERING_OPTIONS = [
+      { label: "Relevance", value: "" },
+      { label: "Name", value: "name" },
+      { label: "Released", value: "-released" },
+      { label: "Added", value: "-added" },
+      { label: "Rating", value: "-rating" },
+      { label: "Metacritic", value: "-metacritic" },
+];
 
 export default function Tab() {
       const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +50,12 @@ export default function Tab() {
       const [isLoading, setIsLoading] = useState(false);
       const [error, setError] = useState<string | null>(null);
       const [allFavourites, setAllFavourites] = useState([]);
+      const [showFilters, setShowFilters] = useState(false);
+      const [filters, setFilters] = useState<Filters>({ genres: [], tags: [] });
+      const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
+      const [selectedTags, setSelectedTags] = useState<number[]>([]);
+      const [selectedMetacritic, setSelectedMetacritic] = useState("");
+      const [selectedOrdering, setSelectedOrdering] = useState("");
       const theme = useTheme();
       const insets = useSafeAreaInsets();
       const navigation = useNavigation();
@@ -28,14 +64,48 @@ export default function Tab() {
             navigation.setOptions({ headerShown: false });
       }, [navigation]);
 
+      useEffect(() => {
+            async function loadFilters() {
+                  try {
+                        const response = await fetch(
+                              `${process.env.EXPO_PUBLIC_API_URL}/filters`,
+                        );
+                        const data = await response.json();
+                        if (!data.error) {
+                              setFilters(data);
+                        }
+                  } catch (e) {
+                        console.error("Failed to load filters:", e);
+                  }
+            }
+            loadFilters();
+      }, []);
+
       async function fetchGames() {
-            if (searchQuery.trim() === "") {
+            if (searchQuery.trim() === "" && selectedGenres.length === 0 && selectedTags.length === 0) {
                   setResults({ results: [] });
                   return;
             }
 
             setIsLoading(true);
             try {
+                  const body: { search: string; genres?: string; tags?: string; metacritic?: string; ordering?: string } = {
+                        search: searchQuery,
+                  };
+
+                  if (selectedGenres.length > 0) {
+                        body.genres = selectedGenres.join(",");
+                  }
+                  if (selectedTags.length > 0) {
+                        body.tags = selectedTags.join(",");
+                  }
+                  if (selectedMetacritic) {
+                        body.metacritic = selectedMetacritic;
+                  }
+                  if (selectedOrdering) {
+                        body.ordering = selectedOrdering;
+                  }
+
                   const response = await fetch(
                         process.env.EXPO_PUBLIC_API_URL + "/search",
                         {
@@ -45,7 +115,7 @@ export default function Tab() {
                                     "Content-Type": "application/json",
                                     Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
                               },
-                              body: JSON.stringify({ search: searchQuery }),
+                              body: JSON.stringify(body),
                         },
                   );
                   const data = await response.json();
@@ -67,6 +137,27 @@ export default function Tab() {
                   setIsLoading(false);
             }
       }
+
+      const clearFilters = () => {
+            setSelectedGenres([]);
+            setSelectedTags([]);
+            setSelectedMetacritic("");
+            setSelectedOrdering("");
+      };
+
+      const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 || selectedMetacritic !== "" || selectedOrdering !== "";
+
+      const toggleGenre = (id: number) => {
+            setSelectedGenres((prev) =>
+                  prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id],
+            );
+      };
+
+      const toggleTag = (id: number) => {
+            setSelectedTags((prev) =>
+                  prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
+            );
+      };
 
       async function fetchAllFavourites() {
             setIsLoading(true);
@@ -171,7 +262,7 @@ export default function Tab() {
                         clearTimeout(timer.current);
                   }
 
-                  if (searchQuery.trim() === "") {
+                  if (searchQuery.trim() === "" && selectedGenres.length === 0 && selectedTags.length === 0) {
                         setResults({ results: [] });
                         setIsLoading(false);
                         return;
@@ -189,7 +280,7 @@ export default function Tab() {
                         }
                   };
             }
-      }, [searchQuery, filter]);
+      }, [searchQuery, filter, selectedGenres, selectedTags, selectedMetacritic, selectedOrdering]);
 
       useEffect(() => {
             if (filter === "favourite") {
@@ -234,26 +325,121 @@ export default function Tab() {
                               onChangeText={setSearchQuery}
                               value={searchQuery}
                         />
-                        <SegmentedButtons
-                              value={filter}
-                              onValueChange={(value) => {
-                                    setResults({ results: [] });
-                                    setFilter(value);
-                              }}
-                              style={{ marginVertical: 8 }}
-                              buttons={[
-                                    {
-                                          value: "browse",
-                                          label: "Browse",
-                                          icon: "magnify",
-                                    },
-                                    {
-                                          value: "favourite",
-                                          label: "Favourite",
-                                          icon: "heart",
-                                    },
-                              ]}
-                        />
+                        <View style={styles.filterRow}>
+                              <SegmentedButtons
+                                    value={filter}
+                                    onValueChange={(value) => {
+                                          setResults({ results: [] });
+                                          setFilter(value);
+                                    }}
+                                    style={styles.segmentedButtons}
+                                    buttons={[
+                                          {
+                                                value: "browse",
+                                                label: "Browse",
+                                                icon: "magnify",
+                                          },
+                                          {
+                                                value: "favourite",
+                                                label: "Favourite",
+                                                icon: "heart",
+                                          },
+                                    ]}
+                              />
+                              <Button
+                                    mode={showFilters ? "contained" : "outlined"}
+                                    onPress={() => setShowFilters(!showFilters)}
+                                    style={styles.filterToggle}
+                                    icon={showFilters ? "chevron-up" : "filter-variant"}
+                              >
+                                    Filters
+                              </Button>
+                        </View>
+
+                        {showFilters && filter === "browse" && (
+                              <View style={styles.filtersContainer}>
+                                    <View style={styles.filterSection}>
+                                          <View style={styles.filterHeader}>
+                                                <Text variant="labelLarge">Ordering</Text>
+                                          </View>
+                                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                                <SegmentedButtons
+                                                      value={selectedOrdering}
+                                                      onValueChange={setSelectedOrdering}
+                                                      buttons={ORDERING_OPTIONS}
+                                                      style={styles.smallButtons}
+                                                />
+                                          </ScrollView>
+                                    </View>
+
+                                    <View style={styles.filterSection}>
+                                          <View style={styles.filterHeader}>
+                                                <Text variant="labelLarge">Metacritic Score</Text>
+                                          </View>
+                                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                                <SegmentedButtons
+                                                      value={selectedMetacritic}
+                                                      onValueChange={setSelectedMetacritic}
+                                                      buttons={METACRITIC_OPTIONS}
+                                                      style={styles.smallButtons}
+                                                />
+                                          </ScrollView>
+                                    </View>
+
+                                    <View style={styles.filterSection}>
+                                          <View style={styles.filterHeader}>
+                                                <Text variant="labelLarge">Genres</Text>
+                                          </View>
+                                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                                <View style={styles.chipRow}>
+                                                      {filters.genres.map((genre) => (
+                                                            <Chip
+                                                                  key={genre.id}
+                                                                  selected={selectedGenres.includes(genre.id)}
+                                                                  onPress={() => toggleGenre(genre.id)}
+                                                                  style={styles.filterChip}
+                                                                  showSelectedCheck
+                                                            >
+                                                                  {genre.name}
+                                                            </Chip>
+                                                      ))}
+                                                </View>
+                                          </ScrollView>
+                                    </View>
+
+                                    <View style={styles.filterSection}>
+                                          <View style={styles.filterHeader}>
+                                                <Text variant="labelLarge">Tags</Text>
+                                          </View>
+                                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                                <View style={styles.chipRow}>
+                                                      {filters.tags.map((tag) => (
+                                                            <Chip
+                                                                  key={tag.id}
+                                                                  selected={selectedTags.includes(tag.id)}
+                                                                  onPress={() => toggleTag(tag.id)}
+                                                                  style={styles.filterChip}
+                                                                  showSelectedCheck
+                                                            >
+                                                                  {tag.name}
+                                                            </Chip>
+                                                      ))}
+                                                </View>
+                                          </ScrollView>
+                                    </View>
+
+                                    {hasActiveFilters && (
+                                          <Button
+                                                mode="text"
+                                                onPress={clearFilters}
+                                                icon="close"
+                                          >
+                                                Clear Filters
+                                          </Button>
+                                    )}
+                              </View>
+                        )}
+
                         {isLoading ? (
                               <View style={styles.loadingContainer}>
                                     <ActivityIndicator size="large" />
@@ -276,11 +462,10 @@ export default function Tab() {
                                                       searchQuery.trim() === ""
                                                             ? "No favourites found"
                                                             : "No matching favourites found";
+                                          } else if (searchQuery.trim() === "" && !hasActiveFilters) {
+                                                message = "Try searching for a game";
                                           } else {
-                                                message =
-                                                      searchQuery.trim() === ""
-                                                            ? "Try searching for a game"
-                                                            : "No games found";
+                                                message = "No games found";
                                           }
                                           return (
                                                 <View style={styles.centered}>
@@ -296,23 +481,59 @@ export default function Tab() {
 }
 
 const styles = StyleSheet.create({
-      container: {
-            flex: 1,
-            padding: 16,
-      },
-      title: {
-            fontWeight: "bold",
-            marginBottom: 16,
-      },
-      centered: {
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-      },
-      loadingContainer: {
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-      },
+       container: {
+             flex: 1,
+             padding: 16,
+       },
+       title: {
+             fontWeight: "bold",
+             marginBottom: 16,
+       },
+       centered: {
+             flex: 1,
+             justifyContent: "center",
+             alignItems: "center",
+             padding: 20,
+       },
+       loadingContainer: {
+             flex: 1,
+             justifyContent: "center",
+             alignItems: "center",
+       },
+       filterRow: {
+             flexDirection: "row",
+             alignItems: "center",
+             gap: 8,
+             marginVertical: 8,
+       },
+       segmentedButtons: {
+             flex: 1,
+       },
+       filterToggle: {
+             height: 40,
+       },
+       filtersContainer: {
+             backgroundColor: "transparent",
+             marginBottom: 8,
+             gap: 12,
+       },
+       filterSection: {
+             gap: 8,
+       },
+       filterHeader: {
+             flexDirection: "row",
+             alignItems: "center",
+             justifyContent: "space-between",
+       },
+       smallButtons: {
+             flexWrap: "nowrap",
+       },
+       chipRow: {
+             flexDirection: "row",
+             gap: 8,
+             paddingRight: 16,
+       },
+       filterChip: {
+             marginBottom: 0,
+       },
 });

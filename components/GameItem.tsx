@@ -3,6 +3,7 @@ import { useTheme } from "react-native-paper";
 import { Card, Text, IconButton, Portal, Modal, Button, Chip, Divider } from "react-native-paper";
 import { View, StyleSheet, ImageBackground, ScrollView } from "react-native";
 import { BlurView } from "expo-blur";
+import * as SecureStore from "@/utils/SecureStore";
 
 interface GameDetails {
     name: string;
@@ -44,6 +45,12 @@ export default function GameItem({ item }: Props) {
         try {
             const response = await fetch(
                 `${process.env.EXPO_PUBLIC_API_URL}/gameDetails?game_id=${item.game_id}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
+                    },
+                },
             );
             const data = await response.json();
             if (data.error) {
@@ -95,10 +102,11 @@ export default function GameItem({ item }: Props) {
                         <BlurView
                             intensity={10}
                             tint="dark"
-                            experimentalBlurMethod="dimezisBlurView"
-                            style={styles.blurView}
-                        >
-                            <View style={styles.overlay}>
+experimentalBlurMethod="dimezisBlurView"
+                        intensity={5}
+                        style={styles.blurView}
+                    >
+                        <View style={styles.overlay}>
                                 <Text style={styles.title} numberOfLines={2}>
                                     {item.name}
                                 </Text>
@@ -136,6 +144,7 @@ export default function GameItem({ item }: Props) {
                                     intensity={20}
                                     tint="dark"
                                     experimentalBlurMethod="dimezisBlurView"
+                                    intensity={10}
                                     style={styles.modalImageBlur}
                                 >
                                     <Text style={styles.modalTitle}>
