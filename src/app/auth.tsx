@@ -1,6 +1,13 @@
 import { Link, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import { useEffect, useState, useRef } from "react";
+import {
+      Keyboard,
+      KeyboardAvoidingView,
+      Platform,
+      StyleSheet,
+      View,
+      ScrollView,
+} from "react-native";
 import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as SecureStore from "@/utils/SecureStore";
@@ -11,8 +18,23 @@ export default function Page() {
       const [name, setName] = useState<string>("");
       const [password, setPassword] = useState<string>("");
       const [error, setError] = useState<string | null>("");
+      const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
       const router = useRouter();
       const theme = useTheme();
+
+      useEffect(() => {
+            const showSub = Keyboard.addListener("keyboardDidShow", () => {
+                  setIsKeyboardVisible(true);
+            });
+            const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+                  setIsKeyboardVisible(false);
+            });
+
+            return () => {
+                  showSub.remove();
+                  hideSub.remove();
+            };
+      }, []);
 
       async function handleResponse(response: any): Promise<string | null> {
             if (response.access_token) {
@@ -21,15 +43,21 @@ export default function Page() {
                   await save("user", JSON.stringify(response.user));
                   return null;
             }
-            
+
             if (response["password"] != null) {
-                  const err = Array.isArray(response["password"]) ? response["password"][0] : response["password"];
+                  const err = Array.isArray(response["password"])
+                        ? response["password"][0]
+                        : response["password"];
                   return err;
             } else if (response["email"] != null) {
-                  const err = Array.isArray(response["email"]) ? response["email"][0] : response["email"];
+                  const err = Array.isArray(response["email"])
+                        ? response["email"][0]
+                        : response["email"];
                   return err;
             } else if (response["name"] != null) {
-                  const err = Array.isArray(response["name"]) ? response["name"][0] : response["name"];
+                  const err = Array.isArray(response["name"])
+                        ? response["name"][0]
+                        : response["name"];
                   return err;
             }
 
@@ -111,9 +139,12 @@ export default function Page() {
             }
 
             // pārbauda vai parole atbilst drošības prasībām
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/;
+            const passwordRegex =
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/;
             if (isSignUp && !passwordRegex.test(password)) {
-                  setError("Password must be at least 8 characters, with 1 uppercase, 1 lowercase, and 1 special character.");
+                  setError(
+                        "Password must be at least 8 characters, with 1 uppercase, 1 lowercase, and 1 special character.",
+                  );
                   return;
             } else if (!isSignUp && password.length < 8) {
                   setError("Passwords must be at least 8 characters long.");
@@ -150,95 +181,118 @@ export default function Page() {
                   <KeyboardAvoidingView
                         behavior={Platform.OS === "ios" ? "padding" : undefined}
                         style={styles.container}
+                        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
                   >
-                  <View
-                        style={[
-                              styles.content,
-                              { backgroundColor: theme.colors.background },
-                        ]}
-                  >
-                        <View
-                              style={[
-                                    styles.titleContainer,
-                                    {
-                                          flexDirection: "column",
-                                          justifyContent: "flex-end",
-                                    },
-                              ]}
+                        <ScrollView
+                              contentContainerStyle={styles.scrollContent}
+                              keyboardShouldPersistTaps="handled"
                         >
-                              <Text
+                              <View
                                     style={[
-                                          styles.title,
+                                          styles.content,
                                           {
-                                                color: theme.colors.primary,
-                                                fontWeight: "bold",
-                                                fontSize: 48,
+                                                backgroundColor:
+                                                      theme.colors.background,
+                                                justifyContent: isKeyboardVisible
+                                                      ? "flex-start"
+                                                      : "center",
                                           },
                                     ]}
-                                    variant="headlineLarge"
                               >
-                                    WhatGame?
-                              </Text>
-                        </View>
-                        <Text style={styles.title} variant="headlineMedium">
-                              {" "}
-                              {isSignUp ? "Create Account" : "Welcome Back"}
-                        </Text>
+                                    <View
+                                          style={[
+                                                styles.titleContainer,
+                                                {
+                                                      flexDirection: "column",
+                                                      justifyContent:
+                                                            "flex-end",
+                                                },
+                                          ]}
+                                    >
+                                          <Text
+                                                style={[
+                                                      styles.title,
+                                                      {
+                                                            color: theme.colors
+                                                                  .primary,
+                                                            fontWeight: "bold",
+                                                            fontSize: 32,
+                                                            marginTop: 20,
+                                                      },
+                                                ]}
+                                          >
+                                                WhatGame?
+                                          </Text>
+                                    </View>
+                                    <Text
+                                          style={styles.title}
+                                          variant="headlineMedium"
+                                    >
+                                          {" "}
+                                          {isSignUp
+                                                ? "Create Account"
+                                                : "Welcome Back"}
+                                    </Text>
 
-                        {isSignUp && (
-                              <TextInput
-                                    label="Name"
-                                    autoCapitalize="none"
-                                    mode="outlined"
-                                    style={styles.input}
-                                    onChangeText={setName}
-                              />
-                        )}
+                                    {isSignUp && (
+                                          <TextInput
+                                                label="Name"
+                                                autoCapitalize="none"
+                                                mode="outlined"
+                                                style={styles.input}
+                                                onChangeText={setName}
+                                          />
+                                    )}
 
-                        <TextInput
-                              label="Email"
-                              autoCapitalize="none"
-                              keyboardType="email-address"
-                              placeholder="example@gmail.com"
-                              mode="outlined"
-                              style={styles.input}
-                              onChangeText={setEmail}
-                        />
+                                    <TextInput
+                                          label="Email"
+                                          autoCapitalize="none"
+                                          keyboardType="email-address"
+                                          placeholder="example@gmail.com"
+                                          mode="outlined"
+                                          style={styles.input}
+                                          onChangeText={setEmail}
+                                    />
 
-                        <TextInput
-                              label="Password"
-                              autoCapitalize="none"
-                              mode="outlined"
-                              secureTextEntry
-                              style={styles.input}
-                              onChangeText={setPassword}
-                        />
+                                    <TextInput
+                                          label="Password"
+                                          autoCapitalize="none"
+                                          mode="outlined"
+                                          secureTextEntry
+                                          style={styles.input}
+                                          onChangeText={setPassword}
+                                    />
 
-                        {error && (
-                              <Text style={{ color: theme.colors.error }}>
-                                    {" "}
-                                    {error}
-                              </Text>
-                        )}
+                                    {error && (
+                                          <Text
+                                                style={{
+                                                      color: theme.colors.error,
+                                                }}
+                                          >
+                                                {" "}
+                                                {error}
+                                          </Text>
+                                    )}
 
-                        <Button
-                              mode="contained"
-                              style={styles.button}
-                              onPress={handleAuth}
-                        >
-                              {isSignUp ? "Sign Up" : "Sign In"}
-                        </Button>
+                                    <Button
+                                          mode="contained"
+                                          style={styles.button}
+                                          onPress={handleAuth}
+                                    >
+                                          {isSignUp ? "Sign Up" : "Sign In"}
+                                    </Button>
 
-                        <Button
-                              mode="text"
-                              onPress={handleSwitchMode}
-                              style={styles.switchModeButton}
-                        >
-                              {isSignUp
-                                    ? "Already have an account? Sign In"
-                                    : "Don't have an account? Sign Up"}
-                        </Button>
-                  </View>
+                                    <Button
+                                          mode="text"
+                                          onPress={handleSwitchMode}
+                                          style={styles.switchModeButton}
+                                    >
+                                          {isSignUp
+                                                ? "Already have an account? Sign In"
+                                                : "Don't have an account? Sign Up"}
+                                    </Button>
+                              </View>
+                        </ScrollView>
                   </KeyboardAvoidingView>
             </View>
       );
@@ -247,6 +301,11 @@ export default function Page() {
 const styles = StyleSheet.create({
       container: {
             flex: 1,
+      },
+      scrollContent: {
+            flexGrow: 1,
+            justifyContent: "center",
+            minHeight: "100%",
       },
       titleContainer: {
             alignItems: "center",

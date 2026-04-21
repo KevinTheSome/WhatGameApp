@@ -202,6 +202,11 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
       };
 
       const handleUpdateProfilePictureUrl = async () => {
+            if (editedProfilePictureUrl.length > 255) {
+                  setError("Profile picture URL must be 255 characters or less");
+                  return;
+            }
+
             try {
                   const response = await fetch(
                         `${process.env.EXPO_PUBLIC_API_URL}/updateUser`,
@@ -369,7 +374,10 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                     />
                               )}
                               <Button
-                                    onPress={() => setIsProfilePictureModalVisible(true)}
+                                    onPress={() => {
+                                          setError("");
+                                          setIsProfilePictureModalVisible(true);
+                                    }}
                               >
                                     <Text>Update Picture URL</Text>
                               </Button>
@@ -446,6 +454,7 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                     ))}
                                     <TouchableOpacity
                                           onPress={() => {
+                                                setError("");
                                                 setColorTheme("custom");
                                                 setIsCustomColorModalVisible(true);
                                           }}
@@ -538,7 +547,10 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                   <Portal>
                         <Modal
                               visible={isProfilePictureModalVisible}
-                              onDismiss={() => setIsProfilePictureModalVisible(false)}
+                              onDismiss={() => {
+                                    setError("");
+                                    setIsProfilePictureModalVisible(false);
+                              }}
                               contentContainerStyle={styles.modalContainer}
                         >
                               <Card>
@@ -551,6 +563,16 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                                 style={styles.input}
                                                 placeholder="https://example.com/avatar.jpg"
                                           />
+                                          {error ? (
+                                                <Text
+                                                      style={[
+                                                            styles.errorText,
+                                                            { color: theme.colors.error },
+                                                      ]}
+                                                >
+                                                      {error}
+                                                </Text>
+                                          ) : null}
                                           <Button onPress={handleUpdateProfilePictureUrl}>
                                                 <Text>Save</Text>
                                           </Button>
@@ -606,7 +628,10 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                   <Portal>
                         <Modal
                               visible={isCustomColorModalVisible}
-                              onDismiss={() => setIsCustomColorModalVisible(false)}
+                              onDismiss={() => {
+                                                setError("");
+                                                setIsCustomColorModalVisible(false);
+                                          }}
                               contentContainerStyle={styles.modalContainer}
                         >
                               <Card>
@@ -619,7 +644,28 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                                 style={styles.input}
                                                 autoCapitalize="none"
                                           />
+                                          {error ? (
+                                                <Text
+                                                      style={[
+                                                            styles.errorText,
+                                                            { color: theme.colors.error },
+                                                      ]}
+                                                >
+                                                      {error}
+                                                </Text>
+                                          ) : null}
                                           <Button onPress={() => {
+                                                const testInput = customRgbInput.toLowerCase();
+                                                const hasOpeningTag = testInput.includes('<');
+                                                const hasClosingTag = testInput.includes('>');
+                                                const hasJsCode = /function|const|let|var|=>|import\s+|export\s+|require\s*\(|\.then\(|\.catch\(/i.test(testInput);
+                                                const hasTsCode = /:\s*(string|number|boolean|any|void|never|unknown)\b|interface\s+\w+|type\s+\w+\s*=|<\w+>/i.test(testInput);
+                                                
+                                                if (hasOpeningTag || hasClosingTag || hasJsCode || hasTsCode) {
+                                                      setError("Invalid color: HTML tags and code are not allowed");
+                                                      return;
+                                                }
+
                                                 setCustomColorRgb(customRgbInput);
                                                 setIsCustomColorModalVisible(false);
                                           }}>

@@ -57,7 +57,10 @@ export default function FriendsTab() {
             if (data["error"] != null) {
                 setError(data["errorMessage"] || data["error"]);
             } else {
-                fetchRequests(); // Refresh the requests list
+                // Remove friend from people list immediately
+                setPeople(prevPeople => prevPeople.filter(person => person.id !== friend.id));
+                // Refresh the requests list
+                fetchRequests();
                 setError(null);
             }
         } catch (error) {
@@ -93,7 +96,10 @@ export default function FriendsTab() {
                 setError(errorMessage);
                 console.error(errorMessage);
             } else {
-                fetchFriends(); // Refresh the friends list
+                // Remove friend from requests list immediately
+                setRequests(prevRequests => prevRequests.filter(request => request.id !== friend.id));
+                // Refresh the friends list
+                fetchFriends();
                 setError(null);
             }
         } catch (error) {
@@ -129,7 +135,10 @@ export default function FriendsTab() {
                 setError(errorMessage);
                 console.error(errorMessage);
             } else {
-                fetchFriends(); // Refresh the friends list
+                // Remove from friends list immediately
+                setFriends(prevFriends => prevFriends.filter(f => f.id !== friend.id));
+                // Remove from requests list immediately (for declining/canceling requests)
+                setRequests(prevRequests => prevRequests.filter(r => r.id !== friend.id));
                 setError(null);
             }
         } catch (error) {
