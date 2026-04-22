@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { ActivityIndicator, StyleSheet, BackHandler } from "react-native";
 import { View, FlatList } from "react-native";
 import { useRouter, useNavigation, useFocusEffect } from "expo-router";
@@ -52,6 +52,7 @@ export default function VoteResults() {
       const [games, setGames] = useState<GameItem[] | undefined>(undefined);
       const [loading, setLoading] = useState(true);
       const [error, setError] = useState<string | null>(null);
+      const isNavigatingAway = useRef(false);
 
       const leaveVoting = async () => {
             try {
@@ -80,6 +81,7 @@ export default function VoteResults() {
 
       const startNewVote = async () => {
             try {
+                  isNavigatingAway.current = true;
                   setLoading(true);
                   const response = await fetch(
                         `${process.env.EXPO_PUBLIC_API_URL}/resetVoting`,
@@ -95,12 +97,15 @@ export default function VoteResults() {
                   if (data.error) {
                         setError(data.error);
                         setLoading(false);
+                        isNavigatingAway.current = false;
                   } else {
-                        router.replace("/voting");
+                        setLoading(false);
+                        router.replace("/lobby");
                   }
             } catch (error) {
                   console.error(error);
                   setLoading(false);
+                  isNavigatingAway.current = false;
             }
       };
 
@@ -126,7 +131,7 @@ export default function VoteResults() {
                               setError(data.error);
                               setLoading(false);
                         } else {
-                              if (data.error !== "You are not in any lobby") {
+                              if (data.error !== "You are not in any lobby" && data.error !== "Voting has not started yet") {
                                     console.error(data.error);
                               }
                         }
@@ -175,7 +180,9 @@ export default function VoteResults() {
 
                   getGameResults(true);
                   const interval = setInterval(() => {
-                        getGameResults(false);
+                        if (!isNavigatingAway.current) {
+                              getGameResults(false);
+                        }
                   }, 2000);
                   return () => {
                         clearInterval(interval);
@@ -201,28 +208,7 @@ export default function VoteResults() {
                         >
                               Results
                         </Text>
-                        <Button
-                              mode="outlined"
-                              onPress={leaveVoting}
-                              style={[styles.button]}
-                              labelStyle={styles.buttonLabel}
-                        >
-                              <Text>Leave Lobby</Text>
-                        </Button>
                   </View>
-
-                  {games && games.length > 0 && (
-                        <View style={styles.newVoteContainer}>
-                              <Button
-                                    mode="contained"
-                                    onPress={startNewVote}
-                                    style={styles.newVoteButton}
-                                    labelStyle={styles.newVoteButtonLabel}
-                              >
-                                    <Text>Start New Vote</Text>
-                              </Button>
-                        </View>
-                  )}
 
                   {loading ? (
                         <View
@@ -273,6 +259,27 @@ export default function VoteResults() {
                               }}
                         />
                   )}
+
+                  {games && games.length > 0 && (
+                        <View style={styles.bottomButtons}>
+                              <Button
+                                    mode="contained"
+                                    onPress={startNewVote}
+                                    style={styles.bottomButton}
+                                    labelStyle={styles.bottomButtonLabel}
+                              >
+                                    <Text>Start New Vote</Text>
+                              </Button>
+                              <Button
+                                    mode="outlined"
+                                    onPress={leaveVoting}
+                                    style={styles.bottomButton}
+                                    labelStyle={styles.bottomButtonLabel}
+                              >
+                                    <Text>Leave Lobby</Text>
+                              </Button>
+                        </View>
+                  )}
             </SafeAreaView>
       );
 }
@@ -295,15 +302,19 @@ const styles = StyleSheet.create({
       buttonLabel: {
             fontSize: 16,
       },
-      newVoteContainer: {
+      bottomButtons: {
+            flexDirection: "row",
+            justifyContent: "space-between",
             paddingHorizontal: 16,
-            marginBottom: 16,
+            paddingVertical: 16,
+            gap: 12,
       },
-      newVoteButton: {
+      bottomButton: {
+            flex: 1,
             height: 50,
             justifyContent: "center",
       },
-      newVoteButtonLabel: {
+      bottomButtonLabel: {
             fontSize: 16,
       },
 });
