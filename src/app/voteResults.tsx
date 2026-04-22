@@ -78,6 +78,32 @@ export default function VoteResults() {
             }
       };
 
+      const startNewVote = async () => {
+            try {
+                  setLoading(true);
+                  const response = await fetch(
+                        `${process.env.EXPO_PUBLIC_API_URL}/resetVoting`,
+                        {
+                              method: "POST",
+                              headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
+                              },
+                        },
+                  );
+                  const data = await response.json();
+                  if (data.error) {
+                        setError(data.error);
+                        setLoading(false);
+                  } else {
+                        router.replace("/voting");
+                  }
+            } catch (error) {
+                  console.error(error);
+                  setLoading(false);
+            }
+      };
+
       const getGameResults = async (showLoading = false) => {
             try {
                   if (showLoading) {
@@ -185,6 +211,19 @@ export default function VoteResults() {
                         </Button>
                   </View>
 
+                  {games && games.length > 0 && (
+                        <View style={styles.newVoteContainer}>
+                              <Button
+                                    mode="contained"
+                                    onPress={startNewVote}
+                                    style={styles.newVoteButton}
+                                    labelStyle={styles.newVoteButtonLabel}
+                              >
+                                    <Text>Start New Vote</Text>
+                              </Button>
+                        </View>
+                  )}
+
                   {loading ? (
                         <View
                               style={{
@@ -254,6 +293,17 @@ const styles = StyleSheet.create({
             justifyContent: "center",
       },
       buttonLabel: {
+            fontSize: 16,
+      },
+      newVoteContainer: {
+            paddingHorizontal: 16,
+            marginBottom: 16,
+      },
+      newVoteButton: {
+            height: 50,
+            justifyContent: "center",
+      },
+      newVoteButtonLabel: {
             fontSize: 16,
       },
 });
