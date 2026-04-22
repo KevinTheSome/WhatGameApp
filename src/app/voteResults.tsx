@@ -35,6 +35,8 @@ interface GameResultsResponse {
       total_votes_cast?: number;
       total_players?: number;
       player_votes?: PlayerVotes;
+      remaining_count?: number;
+      remaining_names?: string[];
 }
 
 interface GameItem {
@@ -52,6 +54,9 @@ export default function VoteResults() {
       const [games, setGames] = useState<GameItem[] | undefined>(undefined);
       const [loading, setLoading] = useState(true);
       const [error, setError] = useState<string | null>(null);
+      const [remainingCount, setRemainingCount] = useState<number | undefined>(undefined);
+      const [remainingNames, setRemainingNames] = useState<string[] | undefined>(undefined);
+      const [totalPlayersCount, setTotalPlayersCount] = useState<number | undefined>(undefined);
       const isNavigatingAway = useRef(false);
 
       const leaveVoting = async () => {
@@ -137,6 +142,9 @@ export default function VoteResults() {
                         }
                   } else if (data.voting_finished === false) {
                         setGames(undefined);
+                        setRemainingCount(data.remaining_count);
+                        setRemainingNames(data.remaining_names);
+                        setTotalPlayersCount(data.total_players);
                         if (showLoading) {
                               setLoading(false);
                         }
@@ -241,10 +249,37 @@ export default function VoteResults() {
                                     padding: 20
                               }}
                         >
-                              <ActivityIndicator size="large" style={{marginBottom: 20}} />
-                              <Text variant="titleMedium" style={{textAlign: "center"}}>
+                              <ActivityIndicator size="large" style={{ marginBottom: 20 }} color={theme.colors.primary} />
+                              <Text variant="titleLarge" style={{ textAlign: "center", fontWeight: "bold", marginBottom: 8 }}>
                                     Waiting for everyone to vote...
                               </Text>
+                              {remainingCount !== undefined && totalPlayersCount !== undefined && (
+                                    <Text variant="bodyLarge" style={{ textAlign: "center", marginBottom: 16 }}>
+                                          {totalPlayersCount - remainingCount} / {totalPlayersCount} players have voted
+                                    </Text>
+                              )}
+                              {remainingNames && remainingNames.length > 0 && (
+                                    <View style={{ alignItems: "center" }}>
+                                          <Text variant="labelLarge" style={{ color: theme.colors.outline, marginBottom: 8 }}>
+                                                STILL VOTING:
+                                          </Text>
+                                          <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
+                                                {remainingNames.map((name, index) => (
+                                                      <View
+                                                            key={index}
+                                                            style={{
+                                                                  backgroundColor: theme.colors.surfaceVariant,
+                                                                  paddingHorizontal: 12,
+                                                                  paddingVertical: 6,
+                                                                  borderRadius: 16
+                                                            }}
+                                                      >
+                                                            <Text variant="labelMedium">{name}</Text>
+                                                      </View>
+                                                ))}
+                                          </View>
+                                    </View>
+                              )}
                         </View>
                   ) : (
                         <FlatList
