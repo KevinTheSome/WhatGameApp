@@ -51,6 +51,8 @@ export default function Tab() {
       const [isLoading, setIsLoading] = useState(false);
       const [error, setError] = useState<string | null>(null);
       const [allFavourites, setAllFavourites] = useState([]);
+      const [recommendations, setRecommendations] = useState<any[]>([]);
+      const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
       const [showFilters, setShowFilters] = useState(false);
 const [filters, setFilters] = useState<Filters>({ genres: [], tags: [] });
        const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
@@ -198,6 +200,35 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
             );
       };
 
+      async function fetchRecommendations() {
+            setIsLoadingRecommendations(true);
+            try {
+                  const response = await fetch(
+                        process.env.EXPO_PUBLIC_API_URL + "/getRecommendations",
+                        {
+                              method: "GET",
+                              headers: {
+                                    Accept: "application/json",
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
+                              },
+                        },
+                  );
+                  const data = await response.json();
+                  if (data["error"] != null) {
+                        setError(data["error"]);
+                        setRecommendations([]);
+                  } else {
+                        setRecommendations(data.results || []);
+                  }
+            } catch (error) {
+                  console.error("Failed to fetch recommendations:", error);
+                  setRecommendations([]);
+            } finally {
+                  setIsLoadingRecommendations(false);
+            }
+      }
+
       async function fetchAllFavourites() {
             setIsLoading(true);
             try {
@@ -299,12 +330,22 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
                   if (filter === "browse") {
                         setResults((prev) => ({
                               ...prev,
-                              results: prev.results.map((g) =>
+                              results: prev.results.map((g: any) =>
                                     g.id === game.id
                                           ? { ...g, favorited: newFavorited }
                                           : g,
                               ),
                         }));
+                        // Optimistic update of the recommendation list
+                        setRecommendations((prev) =>
+                              prev.map((g: any) =>
+                                    g.id === game.id
+                                          ? { ...g, favorited: newFavorited }
+                                          : g,
+                              )
+                        );
+                        // Re-fetch to get a fresh list based on updated favorites profile
+                        fetchRecommendations();
                   }
             },
             [filter],
@@ -318,9 +359,13 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
                         clearTimeout(timer.current);
                   }
 
-                  if (searchQuery.trim() === "" && selectedGenres.length === 0 && selectedTags.length === 0) {
+                  if (searchQuery.trim() === "" && selectedGenres.length === 0 && selectedTags.length === 0 && selectedMetacritic === "" && selectedOrdering === "") {
                         setResults({ results: [] });
                         setIsLoading(false);
+                        // Always fetch recommendations when the browse tab is idle
+                        if (!isLoadingRecommendations) {
+                              fetchRecommendations();
+                        }
                         return;
                   }
 
@@ -589,9 +634,31 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
                               </View>
                         )}
 
-                        {isLoading ? (
+                        {isLoading || (isLoadingRecommendations && filter === "browse" && searchQuery.trim() === "" && !hasActiveFilters) ? (
                               <View style={styles.loadingContainer}>
                                     <ActivityIndicator size="large" />
+                              </View>
+                        ) : filter === "browse" && searchQuery.trim() === "" && !hasActiveFilters ? (
+                              <View style={{ flex: 1 }}>
+                                    {recommendations.length > 0 && (
+                                          <Text style={styles.recommendationTitle} variant="titleMedium">Recommended for You</Text>
+                                    )}
+                                    <FlatList
+                                          data={recommendations}
+                                          renderItem={({ item }) => (
+                                                <GameCard
+                                                      game={item}
+                                                      key={item.id}
+                                                      onFavorite={handleFavorite}
+                                                />
+                                          )}
+                                          keyExtractor={(item) => item.id.toString()}
+                                          ListEmptyComponent={() => (
+                                                <View style={styles.centered}>
+                                                      <Text>No recommendations available</Text>
+                                                </View>
+                                          )}
+                                    />
                               </View>
                         ) : (
                               <FlatList
@@ -611,8 +678,6 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
                                                       searchQuery.trim() === ""
                                                             ? "No favourites found"
                                                             : "No matching favourites found";
-                                          } else if (searchQuery.trim() === "" && !hasActiveFilters) {
-                                                message = "Try searching for a game";
                                           } else {
                                                 message = "No games found";
                                           }
@@ -630,6 +695,10 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
 }
 
 const styles = StyleSheet.create({
+       recommendationTitle: {
+             marginVertical: 12,
+             fontWeight: "bold",
+       },
        container: {
              flex: 1,
              padding: 16,
