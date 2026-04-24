@@ -298,8 +298,25 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
             return filtered;
       };
 
-      const handleFavorite = useCallback(
-            (game: any, newFavorited: boolean) => {
+const handleFavorite = useCallback(
+            async (game: any, newFavorited: boolean) => {
+                  try {
+                        await fetch(
+                              process.env.EXPO_PUBLIC_API_URL + "/addToFavourites",
+                              {
+                                    method: "POST",
+                                    headers: {
+                                          Accept: "application/json",
+                                          "Content-Type": "application/json",
+                                          Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
+                                    },
+                                    body: JSON.stringify({ game_id: game.id }),
+                              },
+                        );
+                  } catch (e) {
+                        console.error("Failed to update favorite:", e);
+                  }
+
                   setAllFavourites((prev) => {
                         const existingIndex = prev.findIndex(
                               (g) => g.id === game.id,
@@ -336,15 +353,13 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
                                           : g,
                               ),
                         }));
-                        // Optimistic update of the recommendation list
                         setRecommendations((prev) =>
                               prev.map((g: any) =>
                                     g.id === game.id
                                           ? { ...g, favorited: newFavorited }
                                           : g,
-                              )
+                              ),
                         );
-                        // Re-fetch to get a fresh list based on updated favorites profile
                         fetchRecommendations();
                   }
             },

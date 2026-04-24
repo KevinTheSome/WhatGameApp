@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { ActivityIndicator, StyleSheet, BackHandler } from "react-native";
 import { View, FlatList } from "react-native";
 import { useRouter, useNavigation, useFocusEffect } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, useTheme, Button } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as SecureStore from "@/utils/SecureStore";
@@ -200,9 +199,10 @@ export default function VoteResults() {
       );
 
       return (
-            <SafeAreaView
+            <View
                   style={{
                         flex: 1,
+                        paddingTop: insets.top,
                         backgroundColor: theme.colors.background,
                   }}
             >
@@ -315,7 +315,7 @@ export default function VoteResults() {
                               </Button>
                         </View>
                   )}
-            </SafeAreaView>
+            </View>
       );
 }
 
