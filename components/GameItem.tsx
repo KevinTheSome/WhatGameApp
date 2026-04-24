@@ -115,7 +115,7 @@ export default function GameItem({ item }: Props) {
                         <View style={styles.bottomRow}>
                             <View style={styles.voteBadge}>
                                 <IconButton
-                                    icon="thumb-up"
+                                    icon={item.votes < 0 ? "thumb-down" : "thumb-up"}
                                     iconColor="rgba(255,255,255,0.8)"
                                     size={14}
                                     style={styles.voteIcon}
