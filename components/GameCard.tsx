@@ -1,8 +1,6 @@
-import { View, StyleSheet, ImageBackground } from "react-native";
-import { BlurView } from "expo-blur";
+import { View, StyleSheet, ImageBackground, ScrollView, ActivityIndicator } from "react-native";
 import { useEffect, useState } from "react";
-import { Text, Card, IconButton, useTheme, Portal, Modal, Button, Chip, Divider } from "react-native-paper";
-import { ScrollView } from "react-native";
+import { Text, Card, IconButton, useTheme, Portal, Modal, Chip } from "react-native-paper";
 import * as SecureStore from "@/utils/SecureStore";
 
 interface GameDetails {
@@ -17,406 +15,407 @@ interface GameDetails {
     genres: { name: string }[];
 }
 
-export default function GameCard(props: any) {
-      const theme = useTheme();
-      const [game, setGame] = useState(props.game);
-      const [favorites, setFavorites] = useState(props.game.favorited);
-      const [isModalVisible, setIsModalVisible] = useState(false);
-      const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
-      const [loadingDetails, setLoadingDetails] = useState(false);
+interface GameData {
+    id: number;
+    background_image: string | null;
+    name: string;
+    favorited: boolean;
+}
 
-      useEffect(() => {
-            setFavorites(props.game.favorited);
-      }, [props.game.favorited]);
+interface Props {
+    game: GameData;
+    onFavorite: (game: GameData, favorited: boolean) => void;
+}
 
-      async function handlefavorites() {
-            const oldFavorites = favorites;
-            const newFavorites = !favorites;
-            setFavorites(newFavorites);
-            try {
-                  const response = await fetch(
-                        process.env.EXPO_PUBLIC_API_URL + "/addToFavourites",
-                        {
-                              method: "POST",
-                              headers: {
-                                    Accept: "application/json",
-                                    "Content-Type": "application/json",
-                                    Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
-                              },
-                              body: JSON.stringify({ game_id: game.id }),
-                        },
-                  );
-                  const data = await response.json();
-                  if (data["error"] != null) {
-                        setFavorites(oldFavorites);
-                  } else {
-                        props.onFavorite(game, newFavorites);
-                  }
-            } catch (error) {
-                  setFavorites(oldFavorites);
-                  console.error(error);
+export default function GameCard({ game, onFavorite }: Props) {
+    const theme = useTheme();
+    const [favorites, setFavorites] = useState(game.favorited);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
+    const [loadingDetails, setLoadingDetails] = useState(false);
+
+    useEffect(() => {
+        setFavorites(game.favorited);
+    }, [game.favorited]);
+
+    async function handleFavorites() {
+        const oldFavorites = favorites;
+        const newFavorites = !favorites;
+        setFavorites(newFavorites);
+        try {
+            const response = await fetch(
+                process.env.EXPO_PUBLIC_API_URL + "/addToFavourites",
+                {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
+                    },
+                    body: JSON.stringify({ game_id: game.id }),
+                },
+            );
+            const data = await response.json();
+            if (data["error"] != null) {
+                setFavorites(oldFavorites);
+            } else {
+                onFavorite(game, newFavorites);
             }
-      }
+        } catch (error) {
+            setFavorites(oldFavorites);
+            console.error(error);
+        }
+    }
 
-      const fetchGameDetails = async () => {
-            setLoadingDetails(true);
-            try {
-                  const response = await fetch(
-                        `${process.env.EXPO_PUBLIC_API_URL}/gameDetails?game_id=${game.id}`,
-                        {
-                              headers: {
-                                    "Content-Type": "application/json",
-                                    Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
-                              },
-                        },
-                  );
-                  const data = await response.json();
-                  if (data.error) {
-                        console.error("Failed to fetch game details:", data.error);
-                        setLoadingDetails(false);
-                        return;
-                  }
-                  setGameDetails({
-                        name: data.name,
-                        background_image: data.background_image,
-                        released: data.released,
-                        metacritic: data.metacritic,
-                        rating: data.rating,
-                        platforms: data.platforms || [],
-                        developers: data.developers || [],
-                        publishers: data.publishers || [],
-                        genres: data.genres || [],
-                  });
-            } catch (error) {
-                  console.error("Failed to fetch game details:", error);
+    const fetchGameDetails = async () => {
+        setLoadingDetails(true);
+        try {
+            const response = await fetch(
+                `${process.env.EXPO_PUBLIC_API_URL}/gameDetails?game_id=${game.id}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
+                    },
+                },
+            );
+            const data = await response.json();
+            if (data.error) {
+                console.error("Failed to fetch game details:", data.error);
+                setLoadingDetails(false);
+                return;
             }
-            setLoadingDetails(false);
-      };
-
-      const handleInfoPress = () => {
-            setIsModalVisible(true);
-            if (!gameDetails) {
-                  fetchGameDetails();
-            }
-      };
-
-      const formatDate = (dateString: string | null) => {
-            if (!dateString) return "Unknown";
-            const date = new Date(dateString);
-            return date.toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
+            setGameDetails({
+                name: data.name,
+                background_image: data.background_image,
+                released: data.released,
+                metacritic: data.metacritic,
+                rating: data.rating,
+                platforms: data.platforms || [],
+                developers: data.developers || [],
+                publishers: data.publishers || [],
+                genres: data.genres || [],
             });
-      };
+        } catch (error) {
+            console.error("Failed to fetch game details:", error);
+        }
+        setLoadingDetails(false);
+    };
 
-      return (
-            <>
-                  <Card style={styles.card}>
-                        <Card.Content style={styles.content}>
-                              <ImageBackground
-                                    source={{ uri: game.background_image }}
-                                    style={styles.imageBackground}
-                                    resizeMode="cover"
-                              >
-                                    <BlurView
-                                          intensity={10}
-                                          tint="dark"
-                                          experimentalBlurMethod="dimezisBlurView"
-                                          style={styles.blurView}
-                                    >
-                                          <View style={styles.overlay}>
-                                                <View style={styles.topRow}>
-                                                      <Text style={styles.title} numberOfLines={2}>
-                                                            {game.name}
-                                                      </Text>
-                                                </View>
-                                                <View style={styles.iconRow}>
-                                                      <IconButton
-                                                            icon="information"
-                                                            iconColor="white"
-                                                            size={24}
-                                                            onPress={handleInfoPress}
-                                                      />
-                                                      <IconButton
-                                                            icon={
-                                                                  favorites
-                                                                        ? "heart"
-                                                                        : "heart-outline"
-                                                            }
-                                                            iconColor="red"
-                                                            size={28}
-                                                            onPress={handlefavorites}
-                                                      />
-                                                </View>
-                                          </View>
-                                    </BlurView>
-                              </ImageBackground>
-                        </Card.Content>
-                  </Card>
+    const handleInfoPress = () => {
+        setIsModalVisible(true);
+        if (!gameDetails) {
+            fetchGameDetails();
+        }
+    };
 
-                  <Portal>
-                        <Modal
-                              visible={isModalVisible}
-                              onDismiss={() => setIsModalVisible(false)}
-                              contentContainerStyle={styles.modalContainer}
-                        >
-                              <ScrollView>
-                                    {gameDetails?.background_image && (
-                                          <ImageBackground
-                                                source={{ uri: gameDetails.background_image }}
-                                                style={styles.modalImage}
-                                                resizeMode="cover"
-                                          >
-                                                <BlurView
-                                                      intensity={20}
-                                                      tint="dark"
-                                                      experimentalBlurMethod="dimezisBlurView"
-                                                      style={styles.modalImageBlur}
+    const formatDate = (dateString: string | null) => {
+        if (!dateString) return "Unknown";
+        return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
+    };
+
+    const getScoreColor = (score: number) => {
+        if (score >= 75) return "#4caf50";
+        if (score >= 50) return "#ff9800";
+        return "#f44336";
+    };
+
+    const modalStyle = [
+        styles.modalContainer,
+        { backgroundColor: theme.colors.surface },
+    ];
+
+    return (
+        <>
+            <Card style={styles.card} onPress={handleInfoPress}>
+                <ImageBackground
+                    source={{ uri: game.background_image || undefined }}
+                    style={styles.imageBackground}
+                    resizeMode="cover"
+                >
+                    <View style={styles.overlay}>
+                        <Text style={styles.title} numberOfLines={2}>
+                            {game.name}
+                        </Text>
+                        <View style={styles.actionRow}>
+                            <IconButton
+                                icon="information-outline"
+                                iconColor="rgba(255,255,255,0.8)"
+                                size={22}
+                                onPress={handleInfoPress}
+                                style={styles.actionButton}
+                            />
+                            <IconButton
+                                icon={favorites ? "heart" : "heart-outline"}
+                                iconColor={favorites ? "#ef4444" : "rgba(255,255,255,0.7)"}
+                                size={26}
+                                onPress={handleFavorites}
+                                style={styles.actionButton}
+                            />
+                        </View>
+                    </View>
+                </ImageBackground>
+            </Card>
+
+            <Portal>
+                <Modal
+                    visible={isModalVisible}
+                    onDismiss={() => setIsModalVisible(false)}
+                    contentContainerStyle={modalStyle}
+                >
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                        {gameDetails?.background_image ? (
+                            <ImageBackground
+                                source={{ uri: gameDetails.background_image }}
+                                style={styles.modalImage}
+                                resizeMode="cover"
+                            >
+                                <View style={styles.modalImageOverlay}>
+                                    <Text style={styles.modalTitle} numberOfLines={2}>
+                                        {gameDetails.name}
+                                    </Text>
+                                </View>
+                            </ImageBackground>
+                        ) : (
+                            <View style={[styles.modalHeaderFallback, { backgroundColor: theme.colors.surfaceVariant }]}>
+                                <Text style={[styles.modalTitleDark, { color: theme.colors.onSurface }]} numberOfLines={2}>
+                                    {game.name}
+                                </Text>
+                            </View>
+                        )}
+
+                        {loadingDetails ? (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="small" color={theme.colors.primary} />
+                                <Text style={[styles.loadingText, { color: theme.colors.onSurfaceVariant }]}>Loading details...</Text>
+                            </View>
+                        ) : (
+                            <View style={styles.detailsContainer}>
+                                {(gameDetails?.metacritic || gameDetails?.rating) && (
+                                    <View style={[styles.scoreRow, { borderBottomColor: theme.colors.outlineVariant }]}>
+                                        {gameDetails?.metacritic != null && (
+                                            <View style={[styles.scoreBadge, { borderColor: getScoreColor(gameDetails.metacritic) }]}>
+                                                <Text style={[styles.scoreValue, { color: getScoreColor(gameDetails.metacritic) }]}>
+                                                    {gameDetails.metacritic}
+                                                </Text>
+                                                <Text style={[styles.scoreLabel, { color: theme.colors.onSurfaceVariant }]}>Metacritic</Text>
+                                            </View>
+                                        )}
+                                        {gameDetails?.rating != null && (
+                                            <View style={styles.scoreBadge}>
+                                                <Text style={styles.scoreValueAlt}>
+                                                    {gameDetails.rating.toFixed(1)}
+                                                </Text>
+                                                <Text style={[styles.scoreLabel, { color: theme.colors.onSurfaceVariant }]}>Rating</Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                )}
+
+                                <View style={styles.detailRow}>
+                                    <Text style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>Released</Text>
+                                    <Text style={[styles.detailValue, { color: theme.colors.onSurface }]}>
+                                        {formatDate(gameDetails?.released)}
+                                    </Text>
+                                </View>
+
+                                {gameDetails?.developers && gameDetails.developers.length > 0 && (
+                                    <View style={styles.detailRow}>
+                                        <Text style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>Developer</Text>
+                                        <Text style={[styles.detailValue, { color: theme.colors.onSurface }]}>
+                                            {gameDetails.developers.map((d) => d.name).join(", ")}
+                                        </Text>
+                                    </View>
+                                )}
+
+                                {gameDetails?.publishers && gameDetails.publishers.length > 0 && (
+                                    <View style={styles.detailRow}>
+                                        <Text style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>Publisher</Text>
+                                        <Text style={[styles.detailValue, { color: theme.colors.onSurface }]}>
+                                            {gameDetails.publishers.map((p) => p.name).join(", ")}
+                                        </Text>
+                                    </View>
+                                )}
+
+                                {gameDetails?.platforms && gameDetails.platforms.length > 0 && (
+                                    <View style={styles.detailSection}>
+                                        <Text style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>Platforms</Text>
+                                        <View style={styles.chipContainer}>
+                                            {gameDetails.platforms.map((p, index) => (
+                                                <Chip
+                                                    key={index}
+                                                    compact
+                                                    style={styles.chip}
+                                                    textStyle={styles.chipText}
                                                 >
-                                                      <Text style={styles.modalTitle}>
-                                                            {gameDetails.name}
-                                                      </Text>
-                                                </BlurView>
-                                          </ImageBackground>
-                                    )}
-                                    {!gameDetails?.background_image && (
-                                          <View style={styles.modalHeader}>
-                                                <Text style={styles.modalTitle}>{game.name}</Text>
-                                          </View>
-                                    )}
+                                                    {p.platform.name}
+                                                </Chip>
+                                            ))}
+                                        </View>
+                                    </View>
+                                )}
 
-                                    {loadingDetails ? (
-                                          <Text style={styles.modalText}>Loading...</Text>
-                                    ) : (
-                                          <>
-                                                {(gameDetails?.metacritic || gameDetails?.rating) && (
-                                                      <View style={styles.ratingRow}>
-                                                            {gameDetails?.metacritic && (
-                                                                  <View style={styles.scoreBadge}>
-                                                                        <Text style={styles.scoreLabel}>Metacritic</Text>
-                                                                        <Text style={styles.scoreValue}>{gameDetails.metacritic}</Text>
-                                                                  </View>
-                                                            )}
-                                                            {gameDetails?.rating && (
-                                                                  <View style={styles.scoreBadge}>
-                                                                        <Text style={styles.scoreLabel}>RAWG Rating</Text>
-                                                                        <Text style={styles.scoreValue}>{gameDetails.rating.toFixed(1)}</Text>
-                                                                  </View>
-                                                            )}
-                                                      </View>
-                                                )}
-
-                                                <View style={styles.detailSection}>
-                                                      <Text style={styles.detailLabel}>Released</Text>
-                                                      <Text style={styles.detailValue}>
-                                                            {formatDate(gameDetails?.released)}
-                                                      </Text>
-                                                </View>
-
-                                                <Divider style={styles.divider} />
-
-                                                <View style={styles.detailSection}>
-                                                      <Text style={styles.detailLabel}>Platforms</Text>
-                                                      <View style={styles.chipContainer}>
-                                                            {gameDetails?.platforms?.map(
-                                                                  (p, index) => (
-                                                                        <Chip
-                                                                              key={index}
-                                                                              style={styles.chip}
-                                                                              textStyle={styles.chipText}
-                                                                        >
-                                                                              {p.platform.name}
-                                                                        </Chip>
-                                                                  ),
-                                                            )}
-                                                      </View>
-                                                </View>
-
-                                                <Divider style={styles.divider} />
-
-                                                <View style={styles.detailSection}>
-                                                      <Text style={styles.detailLabel}>Developer</Text>
-                                                      <Text style={styles.detailValue}>
-                                                            {gameDetails?.developers
-                                                                  ?.map((d) => d.name)
-                                                                  .join(", ") || "Unknown"}
-                                                      </Text>
-                                                </View>
-
-                                                <Divider style={styles.divider} />
-
-                                                <View style={styles.detailSection}>
-                                                      <Text style={styles.detailLabel}>Publisher</Text>
-                                                      <Text style={styles.detailValue}>
-                                                            {gameDetails?.publishers
-                                                                  ?.map((p) => p.name)
-                                                                  .join(", ") || "Unknown"}
-                                                      </Text>
-                                                </View>
-
-                                                {gameDetails?.genres &&
-                                                      gameDetails.genres.length > 0 && (
-                                                            <>
-                                                                  <Divider style={styles.divider} />
-                                                                  <View style={styles.detailSection}>
-                                                                        <Text style={styles.detailLabel}>
-                                                                              Genres
-                                                                        </Text>
-                                                                        <View style={styles.chipContainer}>
-                                                                              {gameDetails.genres.map(
-                                                                                    (g, index) => (
-                                                                                          <Chip
-                                                                                                key={index}
-                                                                                                style={styles.chip}
-                                                                                                textStyle={
-                                                                                                      styles.chipText
-                                                                                                }
-                                                                                          >
-                                                                                                {g.name}
-                                                                                          </Chip>
-                                                                                    ),
-                                                                              )}
-                                                                        </View>
-                                                                  </View>
-                                                            </>
-                                                      )}
-                                          </>
-                                    )}
-
-                                    <Button
-                                          mode="contained"
-                                          onPress={() => setIsModalVisible(false)}
-                                          style={styles.closeButton}
-                                    >
-                                          Close
-                                    </Button>
-                              </ScrollView>
-                        </Modal>
-                  </Portal>
-            </>
-      );
+                                {gameDetails?.genres && gameDetails.genres.length > 0 && (
+                                    <View style={styles.detailSection}>
+                                        <Text style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>Genres</Text>
+                                        <View style={styles.chipContainer}>
+                                            {gameDetails.genres.map((g, index) => (
+                                                <Chip
+                                                    key={index}
+                                                    compact
+                                                    style={styles.chip}
+                                                    textStyle={styles.chipText}
+                                                >
+                                                    {g.name}
+                                                </Chip>
+                                            ))}
+                                        </View>
+                                    </View>
+                                )}
+                            </View>
+                        )}
+                    </ScrollView>
+                </Modal>
+            </Portal>
+        </>
+    );
 }
 
 const styles = StyleSheet.create({
-      card: {
-            marginVertical: 8,
-            borderRadius: 8,
-            padding: 0,
-      },
-      content: {
-            height: 200,
-      },
-      imageBackground: {
-            flex: 1,
-      },
-      overlay: {
-            flex: 1,
-            flexDirection: "column",
-            justifyContent: "space-between",
-            padding: 16,
-      },
-      topRow: {
-            flex: 1,
-            justifyContent: "flex-start",
-      },
-      iconRow: {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-      },
-      blurView: {
-            flex: 1,
-      },
-      title: {
-            fontSize: 20,
-            fontWeight: "bold",
-            color: "white",
-            textShadowColor: "black",
-            textShadowOffset: { width: -1, height: 1 },
-            textShadowRadius: 2,
-            flex: 1,
-      },
-      modalContainer: {
-            backgroundColor: "white",
-            padding: 0,
-            margin: 20,
-            borderRadius: 8,
-            maxHeight: "80%",
-      },
-      modalHeader: {
-            padding: 16,
-      },
-      modalImage: {
-            height: 200,
-            justifyContent: "flex-end",
-      },
-      modalImageBlur: {
-            height: "100%",
-            justifyContent: "flex-end",
-            padding: 16,
-      },
-      modalTitle: {
-            fontSize: 24,
-            fontWeight: "bold",
-            color: "white",
-            textShadowColor: "black",
-            textShadowOffset: { width: -1, height: 1 },
-            textShadowRadius: 2,
-      },
-      modalText: {
-            fontSize: 16,
-            color: "black",
-            padding: 16,
-      },
-      ratingRow: {
-            flexDirection: "row",
-            gap: 12,
-            padding: 16,
-            paddingBottom: 8,
-      },
-      scoreBadge: {
-            alignItems: "center",
-            minWidth: 80,
-      },
-      scoreLabel: {
-            fontSize: 10,
-            color: "gray",
-            marginBottom: 2,
-      },
-      scoreValue: {
-            fontSize: 20,
-            fontWeight: "bold",
-            color: "#1e3a5f",
-      },
-      detailSection: {
-            padding: 16,
-      },
-      detailLabel: {
-            fontSize: 12,
-            color: "gray",
-            marginBottom: 4,
-      },
-      detailValue: {
-            fontSize: 16,
-            color: "black",
-      },
-      chipContainer: {
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: 8,
-            marginTop: 4,
-      },
-      chip: {
-            marginBottom: 0,
-      },
-      chipText: {
-            fontSize: 12,
-      },
-      divider: {
-            marginHorizontal: 16,
-      },
-      closeButton: {
-            margin: 16,
-      },
+    card: {
+        marginHorizontal: 16,
+        marginVertical: 6,
+        borderRadius: 16,
+        overflow: "hidden",
+        elevation: 2,
+    },
+    imageBackground: {
+        height: 200,
+    },
+    overlay: {
+        flex: 1,
+        justifyContent: "space-between",
+        padding: 16,
+        backgroundColor: "rgba(0,0,0,0.35)",
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#fff",
+        lineHeight: 24,
+    },
+    actionRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+    },
+    actionButton: {
+        margin: 0,
+    },
+    modalContainer: {
+        margin: 24,
+        borderRadius: 20,
+        overflow: "hidden",
+        maxHeight: "80%",
+    },
+    modalImage: {
+        height: 180,
+    },
+    modalImageOverlay: {
+        flex: 1,
+        justifyContent: "flex-end",
+        padding: 20,
+        backgroundColor: "rgba(0,0,0,0.4)",
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: "700",
+        color: "#fff",
+        lineHeight: 28,
+    },
+    modalHeaderFallback: {
+        padding: 20,
+    },
+    modalTitleDark: {
+        fontSize: 22,
+        fontWeight: "700",
+        lineHeight: 28,
+    },
+    loadingContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 32,
+        gap: 10,
+    },
+    loadingText: {
+        fontSize: 14,
+    },
+    detailsContainer: {
+        padding: 20,
+        gap: 14,
+    },
+    scoreRow: {
+        flexDirection: "row",
+        gap: 16,
+        paddingBottom: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: "transparent",
+    },
+    scoreBadge: {
+        alignItems: "center",
+        borderWidth: 1.5,
+        borderColor: "#e0e0e0",
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        minWidth: 90,
+    },
+    scoreValue: {
+        fontSize: 24,
+        fontWeight: "700",
+    },
+    scoreValueAlt: {
+        fontSize: 24,
+        fontWeight: "700",
+        color: "#1e3a5f",
+    },
+    scoreLabel: {
+        fontSize: 11,
+        marginTop: 2,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+    },
+    detailRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    detailSection: {
+        gap: 6,
+    },
+    detailLabel: {
+        fontSize: 12,
+        fontWeight: "500",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+    },
+    detailValue: {
+        fontSize: 15,
+        flex: 1,
+        textAlign: "right",
+    },
+    chipContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 6,
+    },
+    chip: {},
+    chipText: {
+        fontSize: 12,
+    },
 });

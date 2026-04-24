@@ -110,7 +110,6 @@ const AnswerCard = ({
             <ImageBackground
                 source={{ uri: game?.info?.background_image || "" }}
                 style={styles.backgroundImage}
-                blurRadius={3}
             >
                 <View style={styles.overlay}>
                     <Text style={styles.gameName}>
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     overlay: {
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderRadius: 8,

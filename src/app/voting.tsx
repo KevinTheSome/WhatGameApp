@@ -57,6 +57,7 @@ export default function VotingView() {
 
     const getGamesToVoteOn = async () => {
         try {
+            console.log("[voting] Fetching games to vote on...");
             const response = await fetch(
                 `${process.env.EXPO_PUBLIC_API_URL}/getVoteGames`,
                 {
@@ -68,11 +69,13 @@ export default function VotingView() {
                 },
             );
             const data = await response.json();
+            console.log("[voting] getVoteGames response:", JSON.stringify(data));
             if (data["error"]) {
                 setError(data["error"]);
                 setLoading(false);
             } else {
                 setGames(data["games"]);
+                console.log("[voting] Games loaded:", data["games"]?.length);
                 setError(null);
                 setLoading(false);
             }
@@ -83,6 +86,7 @@ export default function VotingView() {
     };
     const sendVote = async (vote: "like" | "dislike") => {
         try {
+            console.log("[voting] Sending vote:", vote, "for game:", games?.[currentAnswerIndex].game_id);
             const response = await fetch(
                 `${process.env.EXPO_PUBLIC_API_URL}/postVote`,
                 {
@@ -98,6 +102,7 @@ export default function VotingView() {
                 },
             );
             const data = await response.json();
+            console.log("[voting] postVote response:", JSON.stringify(data));
             if (data["error"]) {
                 setError(data["error"]);
             } else {

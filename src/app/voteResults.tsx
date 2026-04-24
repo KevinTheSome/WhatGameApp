@@ -118,6 +118,7 @@ export default function VoteResults() {
                   if (showLoading) {
                         setLoading(true);
                   }
+                  console.log("[voteResults] Fetching game results...");
                   const response = await fetch(
                         `${process.env.EXPO_PUBLIC_API_URL}/voteResult`,
                         {
@@ -130,6 +131,7 @@ export default function VoteResults() {
                   );
                   const data: GameResultsResponse & { error?: string } =
                         await response.json();
+                  console.log("[voteResults] Response:", JSON.stringify(data));
                   if (data.error) {
                         if (showLoading) {
                               setError(data.error);
@@ -140,6 +142,11 @@ export default function VoteResults() {
                               }
                         }
                   } else if (data.voting_finished === false) {
+                        console.log("[voteResults] Voting not finished:", {
+                              remaining_count: data.remaining_count,
+                              remaining_names: data.remaining_names,
+                              total_players: data.total_players,
+                        });
                         setGames(undefined);
                         setRemainingCount(data.remaining_count);
                         setRemainingNames(data.remaining_names);
@@ -148,6 +155,7 @@ export default function VoteResults() {
                               setLoading(false);
                         }
                   } else if (data.games) {
+                        console.log("[voteResults] Voting finished, games:", Object.keys(data.games));
                         const gameItems: GameItem[] = Object.entries(data.games)
                               .map(([id, game]) => ({
                                     id,

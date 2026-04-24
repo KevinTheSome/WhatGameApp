@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useTheme } from "react-native-paper";
-import { Card, Text, IconButton, Portal, Modal, Button, Chip, Divider } from "react-native-paper";
-import { View, StyleSheet, ImageBackground, ScrollView } from "react-native";
-import { BlurView } from "expo-blur";
+import { Card, Text, IconButton, Portal, Modal, Chip } from "react-native-paper";
+import { View, StyleSheet, ImageBackground, ScrollView, ActivityIndicator } from "react-native";
 import * as SecureStore from "@/utils/SecureStore";
 
 interface GameDetails {
@@ -15,7 +14,7 @@ interface GameDetails {
     genres: { name: string }[];
 }
 
-interface GameItem {
+interface GameItemData {
     id: string;
     game_id?: number;
     background_image: string | null;
@@ -24,7 +23,7 @@ interface GameItem {
 }
 
 interface Props {
-    item: GameItem;
+    item: GameItemData;
 }
 
 export default function GameItem({ item }: Props) {
@@ -38,9 +37,7 @@ export default function GameItem({ item }: Props) {
         "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=200&fit=crop";
 
     const fetchGameDetails = async () => {
-        if (!item.game_id) {
-            return;
-        }
+        if (!item.game_id) return;
         setLoadingDetails(true);
         try {
             const response = await fetch(
@@ -82,169 +79,150 @@ export default function GameItem({ item }: Props) {
 
     const formatDate = (dateString: string | null) => {
         if (!dateString) return "Unknown";
-        const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", {
+        return new Date(dateString).toLocaleDateString("en-US", {
             year: "numeric",
-            month: "long",
+            month: "short",
             day: "numeric",
         });
     };
 
+    const modalStyle = [
+        styles.modalContainer,
+        { backgroundColor: theme.colors.surface },
+    ];
+
     return (
         <>
-            <Card style={styles.card}>
-                <Card.Content style={styles.content}>
-                    <ImageBackground
-                        source={{ uri: imageUri }}
-                        style={styles.imageBackground}
-                        resizeMode="cover"
-                    >
-                        <BlurView
-                            intensity={10}
-                            tint="dark"
-experimentalBlurMethod="dimezisBlurView"
-                        intensity={5}
-                        style={styles.blurView}
-                    >
-                        <View style={styles.overlay}>
-                                <Text style={styles.title} numberOfLines={2}>
-                                    {item.name}
-                                </Text>
-                                <View style={styles.bottomRow}>
-                                    <Text
-                                        style={styles.votes}
-                                    >{`${item.votes} votes`}</Text>
-                                    <IconButton
-                                        icon="information"
-                                        iconColor={theme.colors.primary}
-                                        size={24}
-                                        onPress={handleInfoPress}
-                                    />
-                                </View>
+            <Card style={styles.card} onPress={handleInfoPress}>
+                <ImageBackground
+                    source={{ uri: imageUri }}
+                    style={styles.imageBackground}
+                    resizeMode="cover"
+                >
+                    <View style={styles.overlay}>
+                        <View style={styles.titleRow}>
+                            <Text style={styles.title} numberOfLines={2}>
+                                {item.name}
+                            </Text>
+                            <IconButton
+                                icon="chevron-right"
+                                iconColor="rgba(255,255,255,0.7)"
+                                size={20}
+                                onPress={handleInfoPress}
+                                style={styles.infoButton}
+                            />
+                        </View>
+                        <View style={styles.bottomRow}>
+                            <View style={styles.voteBadge}>
+                                <IconButton
+                                    icon="thumb-up"
+                                    iconColor="rgba(255,255,255,0.8)"
+                                    size={14}
+                                    style={styles.voteIcon}
+                                />
+                                <Text style={styles.votes}>{item.votes}</Text>
                             </View>
-                        </BlurView>
-                    </ImageBackground>
-                </Card.Content>
+                        </View>
+                    </View>
+                </ImageBackground>
             </Card>
 
             <Portal>
                 <Modal
                     visible={isModalVisible}
                     onDismiss={() => setIsModalVisible(false)}
-                    contentContainerStyle={styles.modalContainer}
+                    contentContainerStyle={modalStyle}
                 >
-                    <ScrollView>
-                        {gameDetails?.background_image && (
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                        {gameDetails?.background_image ? (
                             <ImageBackground
                                 source={{ uri: gameDetails.background_image }}
                                 style={styles.modalImage}
                                 resizeMode="cover"
                             >
-                                <BlurView
-                                    intensity={20}
-                                    tint="dark"
-                                    experimentalBlurMethod="dimezisBlurView"
-                                    intensity={10}
-                                    style={styles.modalImageBlur}
-                                >
-                                    <Text style={styles.modalTitle}>
+                                <View style={styles.modalImageOverlay}>
+                                    <Text style={styles.modalTitle} numberOfLines={2}>
                                         {gameDetails.name}
                                     </Text>
-                                </BlurView>
+                                </View>
                             </ImageBackground>
-                        )}
-                        {!gameDetails?.background_image && (
-                            <Text style={styles.modalTitle}>{item.name}</Text>
+                        ) : (
+                            <View style={[styles.modalHeaderFallback, { backgroundColor: theme.colors.surfaceVariant }]}>
+                                <Text style={[styles.modalTitleDark, { color: theme.colors.onSurface }]} numberOfLines={2}>
+                                    {item.name}
+                                </Text>
+                            </View>
                         )}
 
                         {loadingDetails ? (
-                            <Text style={styles.modalText}>Loading...</Text>
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="small" color={theme.colors.primary} />
+                                <Text style={[styles.loadingText, { color: theme.colors.onSurfaceVariant }]}>Loading details...</Text>
+                            </View>
                         ) : (
-                            <>
-                                <View style={styles.detailSection}>
-                                    <Text style={styles.detailLabel}>Released</Text>
-                                    <Text style={styles.detailValue}>
+                            <View style={styles.detailsContainer}>
+                                <View style={styles.detailRow}>
+                                    <Text style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>Released</Text>
+                                    <Text style={[styles.detailValue, { color: theme.colors.onSurface }]}>
                                         {formatDate(gameDetails?.released)}
                                     </Text>
                                 </View>
 
-                                <Divider style={styles.divider} />
+                                {gameDetails?.developers && gameDetails.developers.length > 0 && (
+                                    <View style={styles.detailRow}>
+                                        <Text style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>Developer</Text>
+                                        <Text style={[styles.detailValue, { color: theme.colors.onSurface }]}>
+                                            {gameDetails.developers.map((d) => d.name).join(", ")}
+                                        </Text>
+                                    </View>
+                                )}
 
-                                <View style={styles.detailSection}>
-                                    <Text style={styles.detailLabel}>Platforms</Text>
-                                    <View style={styles.chipContainer}>
-                                        {gameDetails?.platforms?.map(
-                                            (p, index) => (
+                                {gameDetails?.publishers && gameDetails.publishers.length > 0 && (
+                                    <View style={styles.detailRow}>
+                                        <Text style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>Publisher</Text>
+                                        <Text style={[styles.detailValue, { color: theme.colors.onSurface }]}>
+                                            {gameDetails.publishers.map((p) => p.name).join(", ")}
+                                        </Text>
+                                    </View>
+                                )}
+
+                                {gameDetails?.platforms && gameDetails.platforms.length > 0 && (
+                                    <View style={styles.detailSection}>
+                                        <Text style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>Platforms</Text>
+                                        <View style={styles.chipContainer}>
+                                            {gameDetails.platforms.map((p, index) => (
                                                 <Chip
                                                     key={index}
+                                                    compact
                                                     style={styles.chip}
                                                     textStyle={styles.chipText}
                                                 >
                                                     {p.platform.name}
                                                 </Chip>
-                                            ),
-                                        )}
+                                            ))}
+                                        </View>
                                     </View>
-                                </View>
+                                )}
 
-                                <Divider style={styles.divider} />
-
-                                <View style={styles.detailSection}>
-                                    <Text style={styles.detailLabel}>Developer</Text>
-                                    <Text style={styles.detailValue}>
-                                        {gameDetails?.developers
-                                            ?.map((d) => d.name)
-                                            .join(", ") || "Unknown"}
-                                    </Text>
-                                </View>
-
-                                <Divider style={styles.divider} />
-
-                                <View style={styles.detailSection}>
-                                    <Text style={styles.detailLabel}>Publisher</Text>
-                                    <Text style={styles.detailValue}>
-                                        {gameDetails?.publishers
-                                            ?.map((p) => p.name)
-                                            .join(", ") || "Unknown"}
-                                    </Text>
-                                </View>
-
-                                {gameDetails?.genres &&
-                                    gameDetails.genres.length > 0 && (
-                                        <>
-                                            <Divider style={styles.divider} />
-                                            <View style={styles.detailSection}>
-                                                <Text style={styles.detailLabel}>
-                                                    Genres
-                                                </Text>
-                                                <View style={styles.chipContainer}>
-                                                    {gameDetails.genres.map(
-                                                        (g, index) => (
-                                                            <Chip
-                                                                key={index}
-                                                                style={styles.chip}
-                                                                textStyle={
-                                                                    styles.chipText
-                                                                }
-                                                            >
-                                                                {g.name}
-                                                            </Chip>
-                                                        ),
-                                                    )}
-                                                </View>
-                                            </View>
-                                        </>
-                                    )}
-                            </>
+                                {gameDetails?.genres && gameDetails.genres.length > 0 && (
+                                    <View style={styles.detailSection}>
+                                        <Text style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>Genres</Text>
+                                        <View style={styles.chipContainer}>
+                                            {gameDetails.genres.map((g, index) => (
+                                                <Chip
+                                                    key={index}
+                                                    compact
+                                                    style={styles.chip}
+                                                    textStyle={styles.chipText}
+                                                >
+                                                    {g.name}
+                                                </Chip>
+                                            ))}
+                                        </View>
+                                    </View>
+                                )}
+                            </View>
                         )}
-
-                        <Button
-                            mode="contained"
-                            onPress={() => setIsModalVisible(false)}
-                            style={styles.closeButton}
-                        >
-                            Close
-                        </Button>
                     </ScrollView>
                 </Modal>
             </Portal>
@@ -254,103 +232,127 @@ experimentalBlurMethod="dimezisBlurView"
 
 const styles = StyleSheet.create({
     card: {
-        marginVertical: 8,
-        borderRadius: 8,
-        padding: 0,
-    },
-    content: {
-        height: 200,
+        marginHorizontal: 16,
+        marginVertical: 6,
+        borderRadius: 16,
+        overflow: "hidden",
+        elevation: 2,
     },
     imageBackground: {
-        flex: 1,
-    },
-    blurView: {
-        flex: 1,
+        height: 180,
     },
     overlay: {
         flex: 1,
-        flexDirection: "column",
         justifyContent: "space-between",
         padding: 16,
+        backgroundColor: "rgba(0,0,0,0.35)",
+    },
+    titleRow: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
     },
     title: {
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: "600",
-        color: "white",
-        textShadowColor: "black",
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 2,
+        color: "#fff",
         flex: 1,
+        lineHeight: 22,
+    },
+    infoButton: {
+        margin: -8,
     },
     bottomRow: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
+    },
+    voteBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "rgba(255,255,255,0.15)",
+        borderRadius: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+    },
+    voteIcon: {
+        margin: 0,
+        marginLeft: -4,
     },
     votes: {
-        fontSize: 16,
-        color: "white",
-        textShadowColor: "black",
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 2,
+        fontSize: 13,
+        fontWeight: "500",
+        color: "rgba(255,255,255,0.9)",
     },
     modalContainer: {
-        backgroundColor: "white",
-        padding: 0,
-        margin: 20,
-        borderRadius: 8,
+        margin: 24,
+        borderRadius: 20,
+        overflow: "hidden",
         maxHeight: "80%",
     },
     modalImage: {
-        height: 200,
-        justifyContent: "flex-end",
+        height: 180,
     },
-    modalImageBlur: {
-        height: "100%",
+    modalImageOverlay: {
+        flex: 1,
         justifyContent: "flex-end",
-        padding: 16,
+        padding: 20,
+        backgroundColor: "rgba(0,0,0,0.4)",
     },
     modalTitle: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "white",
-        textShadowColor: "black",
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 2,
+        fontSize: 22,
+        fontWeight: "700",
+        color: "#fff",
+        lineHeight: 28,
     },
-    modalText: {
-        fontSize: 16,
-        color: "black",
-        padding: 16,
+    modalHeaderFallback: {
+        padding: 20,
+    },
+    modalTitleDark: {
+        fontSize: 22,
+        fontWeight: "700",
+        lineHeight: 28,
+    },
+    loadingContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 32,
+        gap: 10,
+    },
+    loadingText: {
+        fontSize: 14,
+    },
+    detailsContainer: {
+        padding: 20,
+        gap: 14,
+    },
+    detailRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
     },
     detailSection: {
-        padding: 16,
+        gap: 6,
     },
     detailLabel: {
         fontSize: 12,
-        color: "gray",
-        marginBottom: 4,
+        fontWeight: "500",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
     },
     detailValue: {
-        fontSize: 16,
-        color: "black",
+        fontSize: 15,
+        fontWeight: "400",
+        flex: 1,
+        textAlign: "right",
     },
     chipContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 8,
-        marginTop: 4,
+        gap: 6,
     },
-    chip: {
-        marginBottom: 0,
-    },
+    chip: {},
     chipText: {
         fontSize: 12,
-    },
-    divider: {
-        marginHorizontal: 16,
-    },
-    closeButton: {
-        margin: 16,
     },
 });
