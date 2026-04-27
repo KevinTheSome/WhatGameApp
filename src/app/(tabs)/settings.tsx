@@ -193,7 +193,7 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                         setUser(data.user);
                         setIsEditModalVisible(false);
                   } else {
-                        setError(data.message || "Failed to update profile");
+                        setError(data.error || data.message || "Failed to update profile");
                   }
             } catch (error) {
                   setError("An unexpected error occurred.");
@@ -281,14 +281,18 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                               <Text>Username: {user?.name}</Text>
                               <Text>Email: {user?.email}</Text>
                               <Button
-                                    onPress={() => setIsEditModalVisible(true)}
+                                    onPress={() => {
+                                          setError("");
+                                          setIsEditModalVisible(true);
+                                    }}
                               >
                                     <Text>Edit Profile</Text>
                               </Button>
                               <Button
-                                    onPress={() =>
-                                          setIsChangePasswordModalVisible(true)
-                                    }
+                                    onPress={() => {
+                                          setError("");
+                                          setIsChangePasswordModalVisible(true);
+                                    }}
                               >
                                     <Text>Change Password</Text>
                               </Button>
@@ -518,7 +522,10 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                   <Portal>
                         <Modal
                               visible={isEditModalVisible}
-                              onDismiss={() => setIsEditModalVisible(false)}
+                              onDismiss={() => {
+                                    setError("");
+                                    setIsEditModalVisible(false);
+                              }}
                               contentContainerStyle={styles.modalContainer}
                         >
                               <Card>
@@ -536,6 +543,16 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                                 onChangeText={setEditedEmail}
                                                 style={styles.input}
                                           />
+                                          {error ? (
+                                                <Text
+                                                      style={[
+                                                            styles.errorText,
+                                                            { color: theme.colors.error, marginBottom: 16 },
+                                                      ]}
+                                                >
+                                                      {error}
+                                                </Text>
+                                          ) : null}
                                           <Button onPress={handleUpdateProfile}>
                                                 <Text>Save</Text>
                                           </Button>
@@ -584,9 +601,10 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                   <Portal>
                         <Modal
                               visible={isChangePasswordModalVisible}
-                              onDismiss={() =>
-                                    setIsChangePasswordModalVisible(false)
-                              }
+                              onDismiss={() => {
+                                    setError("");
+                                    setIsChangePasswordModalVisible(false);
+                              }}
                               contentContainerStyle={styles.modalContainer}
                         >
                               <Card>
@@ -615,6 +633,16 @@ const { themePreference, setThemePreference, effectiveColorScheme, colorTheme, s
                                                 secureTextEntry
                                                 style={styles.input}
                                           />
+                                          {error ? (
+                                                <Text
+                                                      style={[
+                                                            styles.errorText,
+                                                            { color: theme.colors.error, marginBottom: 16 },
+                                                      ]}
+                                                >
+                                                      {error}
+                                                </Text>
+                                          ) : null}
                                           <Button
                                                 onPress={handleChangePassword}
                                           >

@@ -48,7 +48,7 @@ export default function Tab() {
       const [errors, setErrors] = useState([]);
       const [newLobbyData, setNewLobbyData] = useState({
             name: "",
-            max_players: 2,
+            max_players: "2",
             friendsOnly: false,
       });
       const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -115,6 +115,13 @@ export default function Tab() {
             setIsLoading(true);
             setError(null);
 
+            const maxPlayersNum = parseInt(newLobbyData.max_players, 10);
+            if (isNaN(maxPlayersNum) || maxPlayersNum < 2) {
+                  setError("Max players must be at least 2.");
+                  setIsLoading(false);
+                  return;
+            }
+
             try {
                   const token = await SecureStore.getItemAsync("token");
                   if (!token) {
@@ -126,6 +133,7 @@ export default function Tab() {
                         {
                               method: "POST",
                               headers: {
+                                    Accept: "application/json",
                                     "Content-Type": "application/json",
                                     Authorization: `Bearer ${token}`,
                               },
@@ -134,7 +142,7 @@ export default function Tab() {
                                     filter: newLobbyData.friendsOnly
                                           ? "friends"
                                           : "public",
-                                    max_players: newLobbyData.max_players,
+                                    max_players: maxPlayersNum,
                               }),
                         },
                   );
@@ -162,7 +170,7 @@ export default function Tab() {
                   setIsEditModalVisible(false);
                   setNewLobbyData({
                         name: "",
-                        max_players: 2,
+                        max_players: "2",
                         friendsOnly: false,
                   });
                   getLobbies();
@@ -411,15 +419,12 @@ export default function Tab() {
                                           />
                                           <TextInput
                                                 label="Max Players"
-                                                value={newLobbyData.max_players.toString()}
+                                                value={newLobbyData.max_players}
                                                 onChangeText={(text) =>
                                                       setNewLobbyData(
                                                             (prev) => ({
                                                                   ...prev,
-                                                                  max_players:
-                                                                        parseInt(
-                                                                              text,
-                                                                        ) || 2,
+                                                                  max_players: text.replace(/[^0-9]/g, ""),
                                                             }),
                                                       )
                                                 }
