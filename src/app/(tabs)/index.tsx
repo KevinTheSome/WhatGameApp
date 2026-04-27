@@ -144,8 +144,11 @@ export default function Tab() {
                         try {
                               const errorJson = await response.json();
                               errorMessage =
+                                    errorJson.error ||
                                     errorJson.message ||
-                                    JSON.stringify(errorJson);
+                                    (errorJson.errorMessages && Object.values(errorJson.errorMessages).flat()[0]) ||
+                                    (errorJson.errorMessage && Object.values(errorJson.errorMessage).flat()[0]) ||
+                                    "An error occurred.";
                         } catch (e) {
                               console.log(
                                     "Could not parse error response as JSON.",

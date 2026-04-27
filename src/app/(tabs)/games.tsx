@@ -128,8 +128,8 @@ const [filters, setFilters] = useState<Filters>({ genres: [], tags: [] });
                         },
                   );
                   const data = await response.json();
-                  if (data["error"] != null) {
-                        setError(data["error"]);
+                  if (data["error"] != null || data["message"] != null) {
+                        setError(data["error"] || data["message"]);
                         setResults({ results: [] });
                   } else {
                         setResults(data);
@@ -245,8 +245,8 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
                         },
                   );
                   const data = await response.json();
-                  if (data["error"] != null) {
-                        setError(data["error"]);
+                  if (data["error"] != null || data["message"] != null) {
+                        setError(data["error"] || data["message"]);
                         setAllFavourites([]);
                         setResults({ results: [] });
                   } else {

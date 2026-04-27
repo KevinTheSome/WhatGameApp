@@ -79,7 +79,7 @@ export default function Page() {
                   );
                   const json = await response.json();
                   if (json["error"] != null) {
-                        return json["error"];
+                        return typeof json["error"] === 'string' ? json["error"] : (json["error"].message || Object.values(json["error"]).flat()[0] || JSON.stringify(json["error"]));
                   }
                   const authError = await handleResponse(json);
                   return authError;
@@ -114,7 +114,7 @@ export default function Page() {
 
                   // pārbauda vai nav kļūda no aizmugursistēmu
                   if (json["error"] != null) {
-                        return json["error"];
+                        return typeof json["error"] === 'string' ? json["error"] : (json["error"].message || Object.values(json["error"]).flat()[0] || JSON.stringify(json["error"]));
                   }
                   // saglaba atbildi aizmugursistēmu
                   const authError = await handleResponse(json);
