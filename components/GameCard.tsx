@@ -43,24 +43,7 @@ export default function GameCard({ game, onFavorite }: Props) {
         const newFavorites = !favorites;
         setFavorites(newFavorites);
         try {
-            const response = await fetch(
-                process.env.EXPO_PUBLIC_API_URL + "/addToFavourites",
-                {
-                    method: "POST",
-                    headers: {
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${await SecureStore.getItemAsync("token")}`,
-                    },
-                    body: JSON.stringify({ game_id: game.id }),
-                },
-            );
-            const data = await response.json();
-            if (data["error"] != null) {
-                setFavorites(oldFavorites);
-            } else {
-                onFavorite(game, newFavorites);
-            }
+            onFavorite(game, newFavorites);
         } catch (error) {
             setFavorites(oldFavorites);
             console.error(error);

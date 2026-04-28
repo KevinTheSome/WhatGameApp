@@ -52,19 +52,20 @@ export default function Tab() {
       const [error, setError] = useState<string | null>(null);
       const [allFavourites, setAllFavourites] = useState([]);
       const [recommendations, setRecommendations] = useState<any[]>([]);
-      const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+      const [isLoadingRecommendations, setIsLoadingRecommendations] =
+            useState(false);
       const [showFilters, setShowFilters] = useState(false);
-const [filters, setFilters] = useState<Filters>({ genres: [], tags: [] });
-       const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
-       const [selectedTags, setSelectedTags] = useState<number[]>([]);
-       const [selectedMetacritic, setSelectedMetacritic] = useState("");
-       const [selectedOrdering, setSelectedOrdering] = useState("");
-       const [genreSearch, setGenreSearch] = useState("");
-       const [tagSearch, setTagSearch] = useState("");
-       const [favGenreSearch, setFavGenreSearch] = useState("");
-       const [favTagSearch, setFavTagSearch] = useState("");
-       const [selectedFavGenres, setSelectedFavGenres] = useState<number[]>([]);
-       const [selectedFavTags, setSelectedFavTags] = useState<number[]>([]);
+      const [filters, setFilters] = useState<Filters>({ genres: [], tags: [] });
+      const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
+      const [selectedTags, setSelectedTags] = useState<number[]>([]);
+      const [selectedMetacritic, setSelectedMetacritic] = useState("");
+      const [selectedOrdering, setSelectedOrdering] = useState("");
+      const [genreSearch, setGenreSearch] = useState("");
+      const [tagSearch, setTagSearch] = useState("");
+      const [favGenreSearch, setFavGenreSearch] = useState("");
+      const [favTagSearch, setFavTagSearch] = useState("");
+      const [selectedFavGenres, setSelectedFavGenres] = useState<number[]>([]);
+      const [selectedFavTags, setSelectedFavTags] = useState<number[]>([]);
       const theme = useTheme();
       const insets = useSafeAreaInsets();
       const navigation = useNavigation();
@@ -91,14 +92,24 @@ const [filters, setFilters] = useState<Filters>({ genres: [], tags: [] });
       }, []);
 
       async function fetchGames() {
-            if (searchQuery.trim() === "" && selectedGenres.length === 0 && selectedTags.length === 0) {
+            if (
+                  searchQuery.trim() === "" &&
+                  selectedGenres.length === 0 &&
+                  selectedTags.length === 0
+            ) {
                   setResults({ results: [] });
                   return;
             }
 
             setIsLoading(true);
             try {
-                  const body: { search: string; genres?: string; tags?: string; metacritic?: string; ordering?: string } = {
+                  const body: {
+                        search: string;
+                        genres?: string;
+                        tags?: string;
+                        metacritic?: string;
+                        ordering?: string;
+                  } = {
                         search: searchQuery,
                   };
 
@@ -128,8 +139,8 @@ const [filters, setFilters] = useState<Filters>({ genres: [], tags: [] });
                         },
                   );
                   const data = await response.json();
-                  if (data["error"] != null || data["message"] != null) {
-                        setError(data["error"] || data["message"]);
+                  if (data["error"] != null) {
+                        setError(data["error"]);
                         setResults({ results: [] });
                   } else {
                         setResults(data);
@@ -160,43 +171,55 @@ const [filters, setFilters] = useState<Filters>({ genres: [], tags: [] });
             setSelectedFavTags([]);
       };
 
-const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 || selectedMetacritic !== "" || selectedOrdering !== "";
+      const hasActiveFilters =
+            selectedGenres.length > 0 ||
+            selectedTags.length > 0 ||
+            selectedMetacritic !== "" ||
+            selectedOrdering !== "";
 
-       const filteredGenres = filters.genres.filter((g) =>
-             g.name.toLowerCase().includes(genreSearch.toLowerCase())
-       );
-       const filteredTags = filters.tags.filter((t) =>
-             t.name.toLowerCase().includes(tagSearch.toLowerCase())
-       );
+      const filteredGenres = filters.genres.filter((g) =>
+            g.name.toLowerCase().includes(genreSearch.toLowerCase()),
+      );
+      const filteredTags = filters.tags.filter((t) =>
+            t.name.toLowerCase().includes(tagSearch.toLowerCase()),
+      );
 
-       const filteredFavGenres = filters.genres.filter((g) =>
-             g.name.toLowerCase().includes(favGenreSearch.toLowerCase())
-       );
-       const filteredFavTags = filters.tags.filter((t) =>
-             t.name.toLowerCase().includes(favTagSearch.toLowerCase())
-       );
+      const filteredFavGenres = filters.genres.filter((g) =>
+            g.name.toLowerCase().includes(favGenreSearch.toLowerCase()),
+      );
+      const filteredFavTags = filters.tags.filter((t) =>
+            t.name.toLowerCase().includes(favTagSearch.toLowerCase()),
+      );
 
-       const toggleGenre = (id: number) => {
+      const toggleGenre = (id: number) => {
             setSelectedGenres((prev) =>
-                  prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id],
+                  prev.includes(id)
+                        ? prev.filter((g) => g !== id)
+                        : [...prev, id],
             );
       };
 
       const toggleTag = (id: number) => {
             setSelectedTags((prev) =>
-                  prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
+                  prev.includes(id)
+                        ? prev.filter((t) => t !== id)
+                        : [...prev, id],
             );
       };
 
       const toggleFavGenre = (id: number) => {
             setSelectedFavGenres((prev) =>
-                  prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id],
+                  prev.includes(id)
+                        ? prev.filter((g) => g !== id)
+                        : [...prev, id],
             );
       };
 
       const toggleFavTag = (id: number) => {
             setSelectedFavTags((prev) =>
-                  prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
+                  prev.includes(id)
+                        ? prev.filter((t) => t !== id)
+                        : [...prev, id],
             );
       };
 
@@ -271,7 +294,7 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
                   return [];
             }
             let filtered = allFavourites;
-            
+
             if (query.trim()) {
                   const lowerQuery = query.toLowerCase();
                   filtered = filtered.filter(
@@ -280,29 +303,38 @@ const hasActiveFilters = selectedGenres.length > 0 || selectedTags.length > 0 ||
                               game.name.toLowerCase().includes(lowerQuery),
                   );
             }
-            
+
             if (selectedFavGenres.length > 0) {
                   filtered = filtered.filter((game) => {
-                        const gameGenres = (game.genres || []).map((g: any) => g.id || g);
-                        return selectedFavGenres.some((id) => gameGenres.includes(id));
+                        const gameGenres = (game.genres || []).map(
+                              (g: any) => g.id || g,
+                        );
+                        return selectedFavGenres.some((id) =>
+                              gameGenres.includes(id),
+                        );
                   });
             }
-            
+
             if (selectedFavTags.length > 0) {
                   filtered = filtered.filter((game) => {
-                        const gameTags = (game.tags || []).map((t: any) => t.id || t);
-                        return selectedFavTags.some((id) => gameTags.includes(id));
+                        const gameTags = (game.tags || []).map(
+                              (t: any) => t.id || t,
+                        );
+                        return selectedFavTags.some((id) =>
+                              gameTags.includes(id),
+                        );
                   });
             }
-            
+
             return filtered;
       };
 
-const handleFavorite = useCallback(
+      const handleFavorite = useCallback(
             async (game: any, newFavorited: boolean) => {
                   try {
-                        await fetch(
-                              process.env.EXPO_PUBLIC_API_URL + "/addToFavourites",
+                        const response = await fetch(
+                              process.env.EXPO_PUBLIC_API_URL +
+                                    "/addToFavourites",
                               {
                                     method: "POST",
                                     headers: {
@@ -313,8 +345,25 @@ const handleFavorite = useCallback(
                                     body: JSON.stringify({ game_id: game.id }),
                               },
                         );
+                        console.log(JSON.stringify({ game_id: game.id }));
+                        console.log(await response.json());
+
+                        if (!response.ok) {
+                              const errorData = await response.json();
+                              throw new Error(
+                                    errorData.error ||
+                                          errorData.message ||
+                                          "Failed to update favorite",
+                              );
+                        }
                   } catch (e) {
                         console.error("Failed to update favorite:", e);
+                        setError(
+                              e instanceof Error
+                                    ? e.message
+                                    : "Failed to update favorite",
+                        );
+                        return;
                   }
 
                   setAllFavourites((prev) => {
@@ -374,7 +423,13 @@ const handleFavorite = useCallback(
                         clearTimeout(timer.current);
                   }
 
-                  if (searchQuery.trim() === "" && selectedGenres.length === 0 && selectedTags.length === 0 && selectedMetacritic === "" && selectedOrdering === "") {
+                  if (
+                        searchQuery.trim() === "" &&
+                        selectedGenres.length === 0 &&
+                        selectedTags.length === 0 &&
+                        selectedMetacritic === "" &&
+                        selectedOrdering === ""
+                  ) {
                         setResults({ results: [] });
                         setIsLoading(false);
                         // Always fetch recommendations when the browse tab is idle
@@ -396,7 +451,14 @@ const handleFavorite = useCallback(
                         }
                   };
             }
-      }, [searchQuery, filter, selectedGenres, selectedTags, selectedMetacritic, selectedOrdering]);
+      }, [
+            searchQuery,
+            filter,
+            selectedGenres,
+            selectedTags,
+            selectedMetacritic,
+            selectedOrdering,
+      ]);
 
       useEffect(() => {
             if (filter === "favourite") {
@@ -409,7 +471,13 @@ const handleFavorite = useCallback(
                   const filtered = filterFavourites(searchQuery);
                   setResults({ results: filtered });
             }
-      }, [filter, searchQuery, allFavourites, selectedFavGenres, selectedFavTags]);
+      }, [
+            filter,
+            searchQuery,
+            allFavourites,
+            selectedFavGenres,
+            selectedFavTags,
+      ]);
 
       return (
             <>
@@ -463,10 +531,16 @@ const handleFavorite = useCallback(
                                     ]}
                               />
                               <Button
-                                    mode={showFilters ? "contained" : "outlined"}
+                                    mode={
+                                          showFilters ? "contained" : "outlined"
+                                    }
                                     onPress={() => setShowFilters(!showFilters)}
                                     style={styles.filterToggle}
-                                    icon={showFilters ? "chevron-up" : "filter-variant"}
+                                    icon={
+                                          showFilters
+                                                ? "chevron-up"
+                                                : "filter-variant"
+                                    }
                               >
                                     Filters
                               </Button>
@@ -476,35 +550,61 @@ const handleFavorite = useCallback(
                               <View style={styles.filtersContainer}>
                                     <View style={styles.filterSection}>
                                           <View style={styles.filterHeader}>
-                                                <Text variant="labelLarge">Ordering</Text>
+                                                <Text variant="labelLarge">
+                                                      Ordering
+                                                </Text>
                                           </View>
-                                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                          <ScrollView
+                                                horizontal
+                                                showsHorizontalScrollIndicator={
+                                                      false
+                                                }
+                                          >
                                                 <SegmentedButtons
                                                       value={selectedOrdering}
-                                                      onValueChange={setSelectedOrdering}
+                                                      onValueChange={
+                                                            setSelectedOrdering
+                                                      }
                                                       buttons={ORDERING_OPTIONS}
-                                                      style={styles.smallButtons}
+                                                      style={
+                                                            styles.smallButtons
+                                                      }
                                                 />
                                           </ScrollView>
                                     </View>
 
                                     <View style={styles.filterSection}>
                                           <View style={styles.filterHeader}>
-                                                <Text variant="labelLarge">Metacritic Score</Text>
+                                                <Text variant="labelLarge">
+                                                      Metacritic Score
+                                                </Text>
                                           </View>
-                                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                          <ScrollView
+                                                horizontal
+                                                showsHorizontalScrollIndicator={
+                                                      false
+                                                }
+                                          >
                                                 <SegmentedButtons
                                                       value={selectedMetacritic}
-                                                      onValueChange={setSelectedMetacritic}
-                                                      buttons={METACRITIC_OPTIONS}
-                                                      style={styles.smallButtons}
+                                                      onValueChange={
+                                                            setSelectedMetacritic
+                                                      }
+                                                      buttons={
+                                                            METACRITIC_OPTIONS
+                                                      }
+                                                      style={
+                                                            styles.smallButtons
+                                                      }
                                                 />
                                           </ScrollView>
                                     </View>
 
                                     <View style={styles.filterSection}>
                                           <View style={styles.filterHeader}>
-                                                <Text variant="labelLarge">Genres</Text>
+                                                <Text variant="labelLarge">
+                                                      Genres
+                                                </Text>
                                           </View>
                                           <TextInput
                                                 mode="outlined"
@@ -512,28 +612,60 @@ const handleFavorite = useCallback(
                                                 value={genreSearch}
                                                 onChangeText={setGenreSearch}
                                                 dense
-                                                right={genreSearch ? <TextInput.Icon icon="close" onPress={() => setGenreSearch("")} /> : null}
+                                                right={
+                                                      genreSearch ? (
+                                                            <TextInput.Icon
+                                                                  icon="close"
+                                                                  onPress={() =>
+                                                                        setGenreSearch(
+                                                                              "",
+                                                                        )
+                                                                  }
+                                                            />
+                                                      ) : null
+                                                }
                                           />
-                                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                          <ScrollView
+                                                horizontal
+                                                showsHorizontalScrollIndicator={
+                                                      false
+                                                }
+                                          >
                                                 <View style={styles.chipRow}>
-                                                      {filteredGenres.map((genre) => (
-                                                            <Chip
-                                                                  key={genre.id}
-                                                                  selected={selectedGenres.includes(genre.id)}
-                                                                  onPress={() => toggleGenre(genre.id)}
-                                                                  style={styles.filterChip}
-                                                                  showSelectedCheck
-                                                            >
-                                                                  {genre.name}
-                                                            </Chip>
-                                                      ))}
+                                                      {filteredGenres.map(
+                                                            (genre) => (
+                                                                  <Chip
+                                                                        key={
+                                                                              genre.id
+                                                                        }
+                                                                        selected={selectedGenres.includes(
+                                                                              genre.id,
+                                                                        )}
+                                                                        onPress={() =>
+                                                                              toggleGenre(
+                                                                                    genre.id,
+                                                                              )
+                                                                        }
+                                                                        style={
+                                                                              styles.filterChip
+                                                                        }
+                                                                        showSelectedCheck
+                                                                  >
+                                                                        {
+                                                                              genre.name
+                                                                        }
+                                                                  </Chip>
+                                                            ),
+                                                      )}
                                                 </View>
                                           </ScrollView>
                                     </View>
 
                                     <View style={styles.filterSection}>
                                           <View style={styles.filterHeader}>
-                                                <Text variant="labelLarge">Tags</Text>
+                                                <Text variant="labelLarge">
+                                                      Tags
+                                                </Text>
                                           </View>
                                           <TextInput
                                                 mode="outlined"
@@ -541,21 +673,51 @@ const handleFavorite = useCallback(
                                                 value={tagSearch}
                                                 onChangeText={setTagSearch}
                                                 dense
-                                                right={tagSearch ? <TextInput.Icon icon="close" onPress={() => setTagSearch("")} /> : null}
+                                                right={
+                                                      tagSearch ? (
+                                                            <TextInput.Icon
+                                                                  icon="close"
+                                                                  onPress={() =>
+                                                                        setTagSearch(
+                                                                              "",
+                                                                        )
+                                                                  }
+                                                            />
+                                                      ) : null
+                                                }
                                           />
-                                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                          <ScrollView
+                                                horizontal
+                                                showsHorizontalScrollIndicator={
+                                                      false
+                                                }
+                                          >
                                                 <View style={styles.chipRow}>
-                                                      {filteredTags.map((tag) => (
-                                                            <Chip
-                                                                  key={tag.id}
-                                                                  selected={selectedTags.includes(tag.id)}
-                                                                  onPress={() => toggleTag(tag.id)}
-                                                                  style={styles.filterChip}
-                                                                  showSelectedCheck
-                                                            >
-                                                                  {tag.name}
-                                                            </Chip>
-                                                      ))}
+                                                      {filteredTags.map(
+                                                            (tag) => (
+                                                                  <Chip
+                                                                        key={
+                                                                              tag.id
+                                                                        }
+                                                                        selected={selectedTags.includes(
+                                                                              tag.id,
+                                                                        )}
+                                                                        onPress={() =>
+                                                                              toggleTag(
+                                                                                    tag.id,
+                                                                              )
+                                                                        }
+                                                                        style={
+                                                                              styles.filterChip
+                                                                        }
+                                                                        showSelectedCheck
+                                                                  >
+                                                                        {
+                                                                              tag.name
+                                                                        }
+                                                                  </Chip>
+                                                            ),
+                                                      )}
                                                 </View>
                                           </ScrollView>
                                     </View>
@@ -576,7 +738,9 @@ const handleFavorite = useCallback(
                               <View style={styles.filtersContainer}>
                                     <View style={styles.filterSection}>
                                           <View style={styles.filterHeader}>
-                                                <Text variant="labelLarge">Genres</Text>
+                                                <Text variant="labelLarge">
+                                                      Genres
+                                                </Text>
                                           </View>
                                           <TextInput
                                                 mode="outlined"
@@ -584,28 +748,60 @@ const handleFavorite = useCallback(
                                                 value={favGenreSearch}
                                                 onChangeText={setFavGenreSearch}
                                                 dense
-                                                right={favGenreSearch ? <TextInput.Icon icon="close" onPress={() => setFavGenreSearch("")} /> : null}
+                                                right={
+                                                      favGenreSearch ? (
+                                                            <TextInput.Icon
+                                                                  icon="close"
+                                                                  onPress={() =>
+                                                                        setFavGenreSearch(
+                                                                              "",
+                                                                        )
+                                                                  }
+                                                            />
+                                                      ) : null
+                                                }
                                           />
-                                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                          <ScrollView
+                                                horizontal
+                                                showsHorizontalScrollIndicator={
+                                                      false
+                                                }
+                                          >
                                                 <View style={styles.chipRow}>
-                                                      {filteredFavGenres.map((genre) => (
-                                                            <Chip
-                                                                  key={genre.id}
-                                                                  selected={selectedFavGenres.includes(genre.id)}
-                                                                  onPress={() => toggleFavGenre(genre.id)}
-                                                                  style={styles.filterChip}
-                                                                  showSelectedCheck
-                                                            >
-                                                                  {genre.name}
-                                                            </Chip>
-                                                      ))}
+                                                      {filteredFavGenres.map(
+                                                            (genre) => (
+                                                                  <Chip
+                                                                        key={
+                                                                              genre.id
+                                                                        }
+                                                                        selected={selectedFavGenres.includes(
+                                                                              genre.id,
+                                                                        )}
+                                                                        onPress={() =>
+                                                                              toggleFavGenre(
+                                                                                    genre.id,
+                                                                              )
+                                                                        }
+                                                                        style={
+                                                                              styles.filterChip
+                                                                        }
+                                                                        showSelectedCheck
+                                                                  >
+                                                                        {
+                                                                              genre.name
+                                                                        }
+                                                                  </Chip>
+                                                            ),
+                                                      )}
                                                 </View>
                                           </ScrollView>
                                     </View>
 
                                     <View style={styles.filterSection}>
                                           <View style={styles.filterHeader}>
-                                                <Text variant="labelLarge">Tags</Text>
+                                                <Text variant="labelLarge">
+                                                      Tags
+                                                </Text>
                                           </View>
                                           <TextInput
                                                 mode="outlined"
@@ -613,26 +809,57 @@ const handleFavorite = useCallback(
                                                 value={favTagSearch}
                                                 onChangeText={setFavTagSearch}
                                                 dense
-                                                right={favTagSearch ? <TextInput.Icon icon="close" onPress={() => setFavTagSearch("")} /> : null}
+                                                right={
+                                                      favTagSearch ? (
+                                                            <TextInput.Icon
+                                                                  icon="close"
+                                                                  onPress={() =>
+                                                                        setFavTagSearch(
+                                                                              "",
+                                                                        )
+                                                                  }
+                                                            />
+                                                      ) : null
+                                                }
                                           />
-                                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                          <ScrollView
+                                                horizontal
+                                                showsHorizontalScrollIndicator={
+                                                      false
+                                                }
+                                          >
                                                 <View style={styles.chipRow}>
-                                                      {filteredFavTags.map((tag) => (
-                                                            <Chip
-                                                                  key={tag.id}
-                                                                  selected={selectedFavTags.includes(tag.id)}
-                                                                  onPress={() => toggleFavTag(tag.id)}
-                                                                  style={styles.filterChip}
-                                                                  showSelectedCheck
-                                                            >
-                                                                  {tag.name}
-                                                            </Chip>
-                                                      ))}
+                                                      {filteredFavTags.map(
+                                                            (tag) => (
+                                                                  <Chip
+                                                                        key={
+                                                                              tag.id
+                                                                        }
+                                                                        selected={selectedFavTags.includes(
+                                                                              tag.id,
+                                                                        )}
+                                                                        onPress={() =>
+                                                                              toggleFavTag(
+                                                                                    tag.id,
+                                                                              )
+                                                                        }
+                                                                        style={
+                                                                              styles.filterChip
+                                                                        }
+                                                                        showSelectedCheck
+                                                                  >
+                                                                        {
+                                                                              tag.name
+                                                                        }
+                                                                  </Chip>
+                                                            ),
+                                                      )}
                                                 </View>
                                           </ScrollView>
                                     </View>
 
-                                    {(selectedFavGenres.length > 0 || selectedFavTags.length > 0) && (
+                                    {(selectedFavGenres.length > 0 ||
+                                          selectedFavTags.length > 0) && (
                                           <Button
                                                 mode="text"
                                                 onPress={() => {
@@ -649,14 +876,27 @@ const handleFavorite = useCallback(
                               </View>
                         )}
 
-                        {isLoading || (isLoadingRecommendations && filter === "browse" && searchQuery.trim() === "" && !hasActiveFilters) ? (
+                        {isLoading ||
+                        (isLoadingRecommendations &&
+                              filter === "browse" &&
+                              searchQuery.trim() === "" &&
+                              !hasActiveFilters) ? (
                               <View style={styles.loadingContainer}>
                                     <ActivityIndicator size="large" />
                               </View>
-                        ) : filter === "browse" && searchQuery.trim() === "" && !hasActiveFilters ? (
+                        ) : filter === "browse" &&
+                          searchQuery.trim() === "" &&
+                          !hasActiveFilters ? (
                               <View style={{ flex: 1 }}>
                                     {recommendations.length > 0 && (
-                                          <Text style={styles.recommendationTitle} variant="titleMedium">Recommended for You</Text>
+                                          <Text
+                                                style={
+                                                      styles.recommendationTitle
+                                                }
+                                                variant="titleMedium"
+                                          >
+                                                Recommended for You
+                                          </Text>
                                     )}
                                     <FlatList
                                           data={recommendations}
@@ -664,13 +904,20 @@ const handleFavorite = useCallback(
                                                 <GameCard
                                                       game={item}
                                                       key={item.id}
-                                                      onFavorite={handleFavorite}
+                                                      onFavorite={
+                                                            handleFavorite
+                                                      }
                                                 />
                                           )}
-                                          keyExtractor={(item) => item.id.toString()}
+                                          keyExtractor={(item) =>
+                                                item.id.toString()
+                                          }
                                           ListEmptyComponent={() => (
                                                 <View style={styles.centered}>
-                                                      <Text>No recommendations available</Text>
+                                                      <Text>
+                                                            No recommendations
+                                                            available
+                                                      </Text>
                                                 </View>
                                           )}
                                     />
@@ -710,63 +957,63 @@ const handleFavorite = useCallback(
 }
 
 const styles = StyleSheet.create({
-       recommendationTitle: {
-             marginVertical: 12,
-             fontWeight: "bold",
-       },
-       container: {
-             flex: 1,
-             padding: 16,
-       },
-       title: {
-             fontWeight: "bold",
-             marginBottom: 16,
-       },
-       centered: {
-             flex: 1,
-             justifyContent: "center",
-             alignItems: "center",
-             padding: 20,
-       },
-       loadingContainer: {
-             flex: 1,
-             justifyContent: "center",
-             alignItems: "center",
-       },
-       filterRow: {
-             flexDirection: "row",
-             alignItems: "center",
-             gap: 8,
-             marginVertical: 8,
-       },
-       segmentedButtons: {
-             flex: 1,
-       },
-       filterToggle: {
-             height: 40,
-       },
-       filtersContainer: {
-             backgroundColor: "transparent",
-             marginBottom: 8,
-             gap: 12,
-       },
-filterSection: {
-              gap: 4,
-        },
-       filterHeader: {
-             flexDirection: "row",
-             alignItems: "center",
-             justifyContent: "space-between",
-       },
-       smallButtons: {
-             flexWrap: "nowrap",
-       },
-       chipRow: {
-             flexDirection: "row",
-             gap: 8,
-             paddingRight: 16,
-       },
-       filterChip: {
-             marginBottom: 0,
-       },
+      recommendationTitle: {
+            marginVertical: 12,
+            fontWeight: "bold",
+      },
+      container: {
+            flex: 1,
+            padding: 16,
+      },
+      title: {
+            fontWeight: "bold",
+            marginBottom: 16,
+      },
+      centered: {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+      },
+      loadingContainer: {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+      },
+      filterRow: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            marginVertical: 8,
+      },
+      segmentedButtons: {
+            flex: 1,
+      },
+      filterToggle: {
+            height: 40,
+      },
+      filtersContainer: {
+            backgroundColor: "transparent",
+            marginBottom: 8,
+            gap: 12,
+      },
+      filterSection: {
+            gap: 4,
+      },
+      filterHeader: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+      },
+      smallButtons: {
+            flexWrap: "nowrap",
+      },
+      chipRow: {
+            flexDirection: "row",
+            gap: 8,
+            paddingRight: 16,
+      },
+      filterChip: {
+            marginBottom: 0,
+      },
 });
